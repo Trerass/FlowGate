@@ -1,2 +1,2 @@
 # FlowGate
-A program that help the community to know everything about the parking zone on EAFIT and eliminate the heavy traffic in the different gates to enter to the university
+This application provides real-time parking information to the EAFIT community, aiming to optimize vehicle access, improve traffic flow, and reduce congestion at the university’s entry gates.
