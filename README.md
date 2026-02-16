@@ -45,3 +45,4 @@ The goal of Flowgate is to reduce congestion, improve parking efficiency, and en
 For questions or collaboration inquiries:
 
 - **Juan Antonio Buendía** – jabuendias@eafit.edu.co
+-**Jerónimo Contreras Sierra** - jcontreras@eafit.edu.co
