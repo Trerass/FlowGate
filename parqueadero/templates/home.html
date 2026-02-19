@@ -1,2 +1,51 @@
-<h1>Welcome to the parking lot management system!</h1>
-<p>Use the navigation menu to access different features of the system.</p>
+<!-- <h1>Welcome to the parking lot management system!</h1>
+<p>Use the navigation menu to access different features of the system.</p> -->
+
+<!-- Se reemplaza el título simple anterior por uno alineado al proyecto -->
+<h1>FlowGate - Traffic & Waiting Time</h1>
+
+<!-- Se cambia el texto genérico por una descripción funcional del sistema -->
+<p>Main screen showing traffic status for each university entrance.</p>
+
+<!-- Se agrega una línea divisoria para separar visualmente el contenido -->
+<hr>
+
+<!-- Se agrega un ciclo Django para mostrar dinámicamente cada entrada -->
+<!-- FR-01: un slider por cada entrada configurada -->
+{% for e in entrances %}
+
+  <!-- Se agrega un contenedor visual para cada entrada -->
+  <!-- Mejora organización y claridad en la interfaz -->
+  <div style="border:1px solid #ddd; padding:12px; border-radius:10px; margin-bottom:12px; max-width:520px;">
+
+    <!-- Se muestra el nombre de la entrada dinámicamente -->
+    <!-- Permite identificar cada acceso (FR-01) -->
+    <h3 style="margin:0 0 10px 0;">{{ e.name }}</h3>
+
+    <!-- Se agrega el slider -->
+    <!-- FR-01 y FR-02 -->
+    <!-- min="0" nivel mínimo de congestión -->
+    <!-- max="100" nivel máximo definido -->
+    <!-- value="{{ e.congestion }}" representa nivel actual -->
+    <!-- disabled evita que el usuario lo modifique (solo visual) -->
+    <input
+      type="range"
+      min="0"
+      max="100"
+      value="{{ e.congestion }}"
+      disabled
+      style="width:100%;"
+    >
+
+    <!-- Se agrega el texto del tiempo estimado -->
+    <!-- FR-04 y FR-05 -->
+    <!-- e.estimated_time debe venir calculado como vehicles × 10 -->
+    <p style="margin:10px 0 0 0;">
+      Estimated time: <strong>{{ e.estimated_time }}</strong> minutes
+      ({{ e.vehicles }} vehicles)
+    </p>
+
+  </div>
+
+<!-- ✅ Se cierra el ciclo dinámico -->
+{% endfor %}
