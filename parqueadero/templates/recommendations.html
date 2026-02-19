@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FlowGate - Recommendations</title>
+</head>
+<body>
+
+    <h1>FlowGate Recommendations</h1>
+
+    <h2> 25</h2>
+    <p>vehicles : {{ entrance_25 }}</p>
+    <p>Estimated time: {{ time_25 }} minutes</p>
+    <input type="range" min="0" max="20" value="{{ entrance_25 }}" disabled>
+
+    <h2>Entrada 24</h2>
+    <p>vehicles: {{ entrance_24 }}</p>
+    <p>Estimated time: {{ time_24 }} minutes</p>
+    <input type="range" min="0" max="20" value="{{ entrance_24 }}" disabled>
+
+    <hr>
+
+    <h2>weather</h2>
+    <p>{{ weather }}</p>
+
+    <h2>Traffic congestion</h2>
+    <p>{{ congestion }}</p>
+
+    <hr>
+
+    <h2>recommendations</h2>
+    <p><strong>{{ recommendation }}</strong></p>
+
+</body>
+</html>
