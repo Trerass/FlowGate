@@ -24,4 +24,5 @@ urlpatterns = [
     path('', pViews.home),
     path('parking/', pViews.parking),
     path('wTime/', pViews.wTime),
+      path("recommendations/", pViews.recommendations)
 ]

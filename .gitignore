@@ -1,3 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Entorno virtual
+venv/
+
+# Base de datos
+db.sqlite3
+
+# Archivos del sistema
+.DS_Store
 venv/ 
 __pycache__/ 
 *.pyc 
