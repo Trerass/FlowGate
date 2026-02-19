@@ -1,1 +1,20 @@
 <h1>Here you can see if the parking lot is full or not</h1>
+parking:
+<h1>Parking status</h1>
+
+<form method="get">
+    <label for="occupied">Vehicles in the parking lot (max 150):</label>
+    <input id="occupied" name="occupied" type="number" min="0" max="150" value="{{ status.occupied_spots }}">
+    <button type="submit">Check</button>
+</form>
+
+<p>Total spots: {{ status.total_spots }}</p>
+<p>Occupied: {{ status.occupied_spots }}</p>
+<p>Available: {{ status.available_spots }}</p>
+<p>Occupancy: {{ status.occupancy_percent }}%</p>
+
+{% if status.is_full %}
+<p><strong>Status: FULL</strong></p>
+{% else %}
+<p><strong>Status: Available</strong></p>
+{% endif %}
