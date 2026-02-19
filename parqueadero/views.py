@@ -1,16 +1,44 @@
 import random
 from django.shortcuts import render
-from django.http import HttpResponse  
 
-# Create your views here. 
+TOTAL_SPOTS = 150
+AVERAGE_SERVICE_MINUTES = 10
+
+
+def calculate_parking_status(occupied_spots, total_spots=TOTAL_SPOTS):
+    occupied = max(0, min(occupied_spots, total_spots))
+    available = total_spots - occupied
+    return {
+        "total_spots": total_spots,
+        "occupied_spots": occupied,
+        "available_spots": available,
+        "is_full": available == 0,
+        "occupancy_percent": round((occupied / total_spots) * 100, 10),
+    }
+
+
+def calculate_waiting_time(queue_size, average_service_minutes=AVERAGE_SERVICE_MINUTES):
+    queue = max(0, queue_size)
+    return queue * average_service_minutes
+
+
+def parse_int(value, default=0):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
 
 def home(request):
-    #return HttpResponse('<h1>Welcome to the parking lot management system!</h1>')
-    return render(request, 'home.html')
+    return render(request, "home.html")
+
 
 def parking(request):
-    #return HttpResponse('<h1>Here you can see if the parking lot is full or not</h1>')
-    return render(request, 'parking.html')
+    occupied = parse_int(request.GET.get("occupied"), 0)
+    status = calculate_parking_status(occupied)
+    context = {"status": status}
+    return render(request, "parking.html", context)
+
 
 def wTime(request):
     #return HttpResponse('<h1>Here you can see the waiting time for each parking spot</h1>')
@@ -63,3 +91,11 @@ def recommendations(request):
     }
 
     return render(request, "recommendations.html", context)
+    queue_size = parse_int(request.GET.get("queue"), 0)
+    waiting_minutes = calculate_waiting_time(queue_size)
+    context = {
+        "queue_size": max(0, queue_size),
+        "average_service_minutes": AVERAGE_SERVICE_MINUTES,
+        "waiting_minutes": waiting_minutes,
+    }
+    return render(request, "wTime.html", context)

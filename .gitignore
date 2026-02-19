@@ -10,3 +10,7 @@ db.sqlite3
 
 # Archivos del sistema
 .DS_Store
+venv/ 
+__pycache__/ 
+*.pyc 
+db.sqlite3 
