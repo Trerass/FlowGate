@@ -1,34 +1,97 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>FlowGate - Recommendations</title>
+    <title>Flowgate Recommendations</title>
+
+    <style>
+        body{
+            font-family: Arial;
+            text-align:center;
+            background-color:#f4f4f4;
+        }
+
+        button{
+            padding:10px 20px;
+            margin:10px;
+            font-size:16px;
+            cursor:pointer;
+        }
+
+        .card{
+            background:white;
+            padding:20px;
+            margin:20px auto;
+            width:300px;
+            border-radius:10px;
+            box-shadow:0px 0px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+
 </head>
+
 <body>
 
-    <h1>FlowGate Recommendations</h1>
+<h1>Flowgate Entrance Status</h1>
 
-    <h2> 25</h2>
-    <p>vehicles : {{ entrance_25 }}</p>
-    <p>Estimated time: {{ time_25 }} minutes</p>
-    <input type="range" min="0" max="20" value="{{ entrance_25 }}" disabled>
+<button onclick="showEntrance('25')">Entrada 25</button>
+<button onclick="showEntrance('24')">Entrada 24</button>
 
-    <h2>Entrada 24</h2>
-    <p>vehicles: {{ entrance_24 }}</p>
-    <p>Estimated time: {{ time_24 }} minutes</p>
-    <input type="range" min="0" max="20" value="{{ entrance_24 }}" disabled>
+<div id="info25" class="card" style="display:none">
 
-    <hr>
+<h2>Entrada 25</h2>
 
-    <h2>weather</h2>
-    <p>{{ weather }}</p>
+<p>Cars in queue: {{ entrance_25 }}</p>
 
-    <h2>Traffic congestion</h2>
-    <p>{{ congestion }}</p>
+<p>Estimated waiting time: {{ time_25 }} minutes</p>
 
-    <hr>
+<input type="range" min="0" max="60" value="{{ time_25 }}" disabled>
 
-    <h2>recommendations</h2>
-    <p><strong>{{ recommendation }}</strong></p>
+</div>
+
+
+<div id="info24" class="card" style="display:none">
+
+<h2>Entrada 24</h2>
+
+<p>Cars in queue: {{ entrance_24 }}</p>
+
+<p>Estimated waiting time: {{ time_24 }} minutes</p>
+
+<input type="range" min="0" max="60" value="{{ time_24 }}" disabled>
+
+</div>
+
+
+<div class="card">
+
+<h3>Weather: {{ weather }}</h3>
+
+<h3>Traffic level: {{ congestion }}</h3>
+
+<p>{{ recommendation }}</p>
+
+</div>
+
+
+<script>
+
+function showEntrance(entrance){
+
+document.getElementById("info25").style.display="none";
+document.getElementById("info24").style.display="none";
+
+if(entrance=="25"){
+document.getElementById("info25").style.display="block";
+}
+
+if(entrance=="24"){
+document.getElementById("info24").style.display="block";
+}
+
+}
+
+</script>
+
 
 </body>
 </html>
