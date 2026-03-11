@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowGate Payments</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .card {
+            background: #fff;
+            max-width: 460px;
+            margin: 0 auto;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        input {
+            padding: 8px;
+            width: 180px;
+        }
+
+        button, .link-btn {
+            margin-top: 10px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #2e7d32;
+            color: #fff;
+        }
+
+        .link-btn {
+            background-color: #1976d2;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Payments</h1>
+        <p>Put the value of the payment</p>
+
+        <form method="get">
+            <label for="amount">Amount (COP):</label><br>
+            <input id="amount" name="amount" type="number" min="0" value="{{ amount }}"><br>
+            <button type="submit">Process Payment</button>
+        </form>
+
+        {% if payment_ready %}
+            <p><strong>Payment ready for ${{ amount }}.</strong></p>
+        {% else %}
+            <p>No payment loaded yet.</p>
+        {% endif %}
+
+        <a class="link-btn" href="/">go back</a>
+    </div>
+</body>
+</html>

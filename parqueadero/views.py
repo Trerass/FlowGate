@@ -2,7 +2,6 @@ import random
 from django.shortcuts import render
 
 TOTAL_SPOTS = 150
-AVERAGE_SERVICE_MINUTES = 10
 
 
 def calculate_parking_status(occupied_spots, total_spots=TOTAL_SPOTS):
@@ -15,11 +14,6 @@ def calculate_parking_status(occupied_spots, total_spots=TOTAL_SPOTS):
         "is_full": available == 0,
         "occupancy_percent": round((occupied / total_spots) * 100, 10),
     }
-
-
-def calculate_waiting_time(queue_size, average_service_minutes=AVERAGE_SERVICE_MINUTES):
-    queue = max(0, queue_size)
-    return queue * average_service_minutes
 
 
 def parse_int(value, default=0):
@@ -40,29 +34,16 @@ def parking(request):
     return render(request, "parking.html", context)
 
 
-def wTime(request):
-    #return HttpResponse('<h1>Here you can see the waiting time for each parking spot</h1>')
-    return render(request, 'wTime.html')
-  
-
-
-
-
 def recommendations(request):
-
-   
     entrance_25 = random.randint(0, 20)
     entrance_24 = random.randint(0, 20)
 
- 
     time_25 = entrance_25 * 3
     time_24 = entrance_24 * 3
 
-  
     weather_options = ["Sunny", "Rainy"]
     weather = random.choice(weather_options)
 
- 
     avg_traffic = (entrance_25 + entrance_24) / 2
 
     if avg_traffic < 5:
@@ -72,7 +53,6 @@ def recommendations(request):
     else:
         congestion = "High"
 
-   
     if congestion == "High" or weather == "Rainy":
         recommendation = "High congestion expected. Consider delaying your arrival."
     elif congestion == "Moderate":
@@ -91,11 +71,33 @@ def recommendations(request):
     }
 
     return render(request, "recommendations.html", context)
-    queue_size = parse_int(request.GET.get("queue"), 0)
-    waiting_minutes = calculate_waiting_time(queue_size)
+
+
+def payments(request):
+    amount = parse_int(request.GET.get("amount"), 0)
     context = {
-        "queue_size": max(0, queue_size),
-        "average_service_minutes": AVERAGE_SERVICE_MINUTES,
-        "waiting_minutes": waiting_minutes,
+        "amount": max(0, amount),
+        "payment_ready": amount > 0,
     }
-    return render(request, "wTime.html", context)
+    return render(request, "payments.html", context)
+
+
+def login_view(request):
+    context = {"logged_in": False, "username": ""}
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "")
+        context["username"] = username
+        context["logged_in"] = bool(username and password)
+    return render(request, "login.html", context)
+
+
+def signup(request):
+    context = {"registered": False, "username": ""}
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip()
+        password = request.POST.get("password", "")
+        context["username"] = username
+        context["registered"] = bool(username and email and password)
+    return render(request, "signup.html", context)

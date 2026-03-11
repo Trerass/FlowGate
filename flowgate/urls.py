@@ -21,8 +21,10 @@ from parqueadero import views as pViews
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('', pViews.home),
-    path('parking/', pViews.parking),
-    path('wTime/', pViews.wTime),
-      path("recommendations/", pViews.recommendations)
+    path("", pViews.home, name="home"),
+    path("parking/", pViews.parking, name="parking"),
+    path("recommendations/", pViews.recommendations, name="recommendations"),
+    path("payments/", pViews.payments, name="payments"),
+    path("login/", pViews.login_view, name="login"),
+    path("signup/", pViews.signup, name="signup"),
 ]
