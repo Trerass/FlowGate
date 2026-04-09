@@ -1,35 +1,199 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log In</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; padding: 30px 10px; }
-        .card { background: #fff; max-width: 420px; margin: 0 auto; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        input { margin: 6px 0; padding: 8px; width: 80%; }
-        button, .link-btn { margin-top: 10px; padding: 10px 14px; border-radius: 8px; border: none; text-decoration: none; display: inline-block; }
-        button { background: #6a1b9a; color: #fff; }
-        .link-btn { background: #1976d2; color: #fff; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>Log In</h1>
-        <form method="post">
-            {% csrf_token %}
-            <input type="text" name="username" placeholder="Username" required><br>
-            <input type="password" name="password" placeholder="Password" required><br>
-            <button type="submit">Log In</button>
-        </form>
+{% extends "base.html" %}
 
-        {% if logged_in %}
-            <p><strong>Welcome, {{ username }}.</strong></p>
-        {% else %}
-            <p>Enter your credentials to log in.</p>
-        {% endif %}
+{% block title %}Login - FlowGate{% endblock %}
 
-        <a class="link-btn" href="javascript:history.back()">go back</a>
+{% block styles %}
+<style>
+    .auth-container {
+        max-width: 450px;
+        margin: 50px auto;
+        background: #fff;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .auth-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .auth-tab {
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        color: #999;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+    }
+    
+    .auth-tab.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+    }
+    
+    .auth-form {
+        display: none;
+    }
+    
+    .auth-form.active {
+        display: block;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    label {
+        display: block;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 6px;
+        font-size: 14px;
+    }
+    
+    input, select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+    
+    input:focus, select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    button[type="submit"] {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+    }
+    
+    button[type="submit"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .error {
+        background: #ffebee;
+        color: #c62828;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        border-left: 4px solid #c62828;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h1 style="color: #667eea; margin-bottom: 30px; text-align: center;">FlowGate</h1>
+    
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+    
+    <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">{{ translations.login }}</button>
+        <button class="auth-tab" onclick="switchTab('signup')">{{ translations.signup }}</button>
     </div>
-</body>
-</html>
+    
+    <!-- Login Form -->
+    <form method="post" class="auth-form active" id="login-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="login">
+        
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        
+        <button type="submit">{{ translations.login }}</button>
+    </form>
+    
+    <!-- Signup Form -->
+    <form method="post" class="auth-form" id="signup-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="signup">
+        
+        <div class="form-group">
+            <label for="signup_username">Username</label>
+            <input type="text" id="signup_username" name="signup_username" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="signup_password">Password</label>
+            <input type="password" id="signup_password" name="signup_password" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="phone">{{ translations.phone }}</label>
+            <input type="tel" id="phone" name="phone">
+        </div>
+        
+        <div class="form-group">
+            <label for="codigo">{{ translations.student_code }}</label>
+            <input type="text" id="codigo" name="codigo">
+        </div>
+        
+        <div class="form-group">
+            <label for="tipo_usuario">{{ translations.user_type }}</label>
+            <select id="tipo_usuario" name="tipo_usuario">
+                <option value="estudiante">Estudiante</option>
+                <option value="profesor">Profesor</option>
+            </select>
+        </div>
+        
+        <button type="submit">{{ translations.signup }}</button>
+    </form>
+</div>
+
+<script>
+    function switchTab(tab) {
+        // Hide all forms
+        document.getElementById('login-form').classList.remove('active');
+        document.getElementById('signup-form').classList.remove('active');
+        
+        // Remove active from all tabs
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        
+        // Show selected form and mark tab as active
+        if (tab === 'login') {
+            document.getElementById('login-form').classList.add('active');
+            document.querySelectorAll('.auth-tab')[0].classList.add('active');
+        } else {
+            document.getElementById('signup-form').classList.add('active');
+            document.querySelectorAll('.auth-tab')[1].classList.add('active');
+        }
+    }
+</script>
+{% endblock %}

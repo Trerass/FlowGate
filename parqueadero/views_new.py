@@ -1,9 +1,13 @@
 import random
+import requests
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .models import Parqueadero, Entrada, PerfilUsuario, Vehiculo, Historial
+from datetime import datetime
+
+TOTAL_SPOTS = 150
 
 # Diccionario de traducciones
 TRANSLATIONS = {
@@ -143,17 +147,12 @@ def get_parking_data(lang):
     weather_options = weather_options_es if lang == 'es' else weather_options_en
     weather = random.choice(weather_options)
 
-    # Calcular congestión basada en fila total
-    congestion_levels = [
-        (10, "low"),
-        (30, "moderate"),
-        (float('inf'), "high")
-    ]
-    congestion_key = "low"
-    for threshold, level in congestion_levels:
-        if total_fila < threshold:
-            congestion_key = level
-            break
+    if total_fila < 10:
+        congestion_key = "low"
+    elif total_fila < 30:
+        congestion_key = "moderate"
+    else:
+        congestion_key = "high"
     
     congestion = get_translation(lang, congestion_key)
 

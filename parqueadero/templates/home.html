@@ -1,31 +1,500 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlowGate Home</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; margin: 0; padding: 40px 20px; }
-        .card { background: #fff; max-width: 700px; margin: 0 auto; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
-        .button-group { margin-top: 24px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
-        .btn { display: inline-block; padding: 10px 18px; border-radius: 8px; color: #fff; text-decoration: none; font-weight: 600; }
-        .btn-recommendations { background-color: #1976d2; }
-        .btn-payments { background-color: #2e7d32; }
-        .btn-login { background-color: #6a1b9a; }
-        .btn-signup { background-color: #ef6c00; }
+{% extends "base.html" %}
+
+{% block title %}Home - FlowGate{% endblock %}
+
+{% block styles %}
+<style>
+    .info-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .info-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .weather-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    
+    .congestion-box {
+        background: #fff3e0;
+        border-left: 4px solid #ff9800;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-weight: bold;
+        color: #e65100;
+    }
+    
+    .parking-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 20px;
+    }
+    
+    .parking-card {
+        background: #f9f9f9;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .parking-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .parking-name {
+        font-size: 20px;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 10px;
+    }
+    
+    .parking-stat {
+        margin: 8px 0;
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .occupancy-bar {
+        width: 100%;
+        height: 8px;
+        background: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 8px 0;
+    }
+    
+    .occupancy-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4caf50, #ffc107, #ff6b6b);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+    
+    .entrance-info {
+        background: #e3f2fd;
+        padding: 10px;
+        border-radius: 6px;
+        margin: 8px 0;
+        font-size: 13px;
+        border-left: 3px solid #667eea;
+    }
+    
+    .entrance-label {
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 3px;
+    }
+    
+    .entrance-detail {
+        color: #555;
+        margin: 2px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 style="color: #667eea; margin-bottom: 30px;">{{ translations.welcome }}</h1>
+
+<!-- Clima y Congestión -->
+<div class="info-section">
+    <div class="info-title">📊 {{ translations.weather }} {% if congestion %}y {{ translations.congestion }}{% endif %}</div>
+    <div class="weather-box">
+        ☀️ {{ weather }}
+    </div>
+    <div class="congestion-box">
+        🚗 {{ translations.congestion }}: {{ congestion }}
+    </div>
+</div>
+
+<!-- Parqueaderos -->
+<div class="info-section">
+    <div class="info-title">🅿️ {{ translations.parking_status }}</div>
+    <div class="parking-grid">
+        {% for p in parqueaderos %}
+        <div class="parking-card">
+            <div class="parking-name">{{ p.nombre }}</div>
+            
+            <div class="parking-stat">
+                <strong>{{ translations.capacity }}:</strong> {{ p.capacidad }}
+            </div>
+            
+            <div class="parking-stat">
+                <strong>{{ translations.occupancy }}:</strong> {{ p.ocupancia }} / {{ p.capacidad }}
+            </div>
+            
+            <div class="occupancy-bar">
+                <div class="occupancy-fill" style="width: {{ p.ocupancia_percent }}%;"></div>
+            </div>
+            
+            <div style="font-size: 12px; color: #999; margin-bottom: 12px;">
+                {{ p.ocupancia_percent }}%
+            </div>
+            
+            {% for e in p.entradas %}
+            <div class="entrance-info">
+                <div class="entrance-label">{{ translations.entrance }}: {{ e.nombre }}</div>
+                <div class="entrance-detail">
+                    {{ translations.queue }}: <strong>{{ e.fila }}</strong>
+                </div>
+                <div class="entrance-detail">
+                    ⏱️ {{ translations.waiting_time }}: <strong>{{ e.tiempo_espera }} {{ translations.minutes }}</strong>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+        
+        .header {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 24px;
+        }
+        
+        .language-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .language-selector a {
+            padding: 8px 12px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #667eea;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .language-selector a.active {
+            background: #667eea;
+            color: #fff;
+        }
+        
+        .language-selector a:hover {
+            background: #667eea;
+            color: #fff;
+        }
+        
+        .slider-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slider {
+            display: flex;
+            transition: transform 0.3s ease;
+            width: 300%;
+        }
+        
+        .slide {
+            width: 33.333%;
+            padding: 20px;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .parking-info {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 8px 0;
+            text-align: left;
+        }
+        
+        .parking-info h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .parking-info p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .entrance-info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 8px 0;
+            font-size: 13px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .weather-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .congestion-box {
+            background: #fff3e0;
+            color: #e65100;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid #ffb74d;
+        }
+        
+        .slider-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        .slider-btn {
+            background: #667eea;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .slider-btn:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+        
+        .slider-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+        
+        .slide-indicator {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .indicator-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .indicator-dot.active {
+            background: #667eea;
+            transform: scale(1.3);
+        }
+        
+        .slide-label {
+            text-align: center;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .card-content {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .action-link {
+            display: inline-block;
+            background: #667eea;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 8px 4px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .action-link:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .language-selector {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Welcome to FlowGate</h1>
+    <div class="container">
+        <div class="header">
+            <h1>FlowGate</h1>
+            <div class="language-selector">
+                <span style="color: #667eea; font-weight: 600;">{{ translations.language }}:</span>
+                <a href="?lang=es" class="{% if lang == 'es' %}active{% endif %}">Español</a>
+                <a href="?lang=en" class="{% if lang == 'en' %}active{% endif %}">English</a>
+            </div>
+        </div>
         
-
-        <div class="button-group">
-            <a class="btn btn-recommendations" href="/recommendations/">Recommendations</a>
-            <a class="btn btn-payments" href="/payments/">Payments</a>
-            <a class="btn btn-login" href="/login/">Log In</a>
-            <a class="btn btn-signup" href="/signup/">Sign In</a>
+        <div class="slider-container">
+            <div class="slider" id="slider">
+                <!-- Slide 1: Parqueaderos -->
+                <div class="slide active">
+                    <div class="slide-label">{{ translations.parking_status }}</div>
+                    <div class="weather-box">{{ translations.weather }}: {{ weather }}</div>
+                    <div class="congestion-box">{{ translations.congestion }}: {{ congestion }}</div>
+                    {% for p in parqueaderos %}
+                    <div class="parking-info">
+                        <h3>{{ p.nombre }}</h3>
+                        <p>{{ translations.capacity }}: {{ p.capacidad }}</p>
+                        <p>{{ translations.occupancy }}: {{ p.ocupancia }} ({{ p.ocupancia_percent }}%)</p>
+                        {% for e in p.entradas %}
+                        <div class="entrance-info">
+                            <strong>{{ translations.entrance }} {{ e.nombre }}</strong><br>
+                            {{ translations.queue }}: {{ e.fila }}<br>
+                            {{ translations.waiting_time }}: {{ e.tiempo_espera }} {{ translations.minutes }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Slide 2: Pagos -->
+                <div class="slide">
+                    <div class="slide-label">{{ translations.payments }}</div>
+                    <div class="card-content">
+                        <h2>{{ translations.payments }}</h2>
+                        <p style="color: #666; margin: 15px 0;">{{ translations.payments }} description goes here</p>
+                        <a href="/payments/?lang={{ lang }}" class="action-link">{{ translations.payments }}</a>
+                    </div>
+                </div>
+                
+                <!-- Slide 3: Login/Signup -->
+                <div class="slide">
+                    <div class="slide-label">{{ translations.login }} / {{ translations.signup }}</div>
+                    <div class="card-content">
+                        <a href="/login/?lang={{ lang }}" class="action-link">{{ translations.login }}</a>
+                        <a href="/signup/?lang={{ lang }}" class="action-link">{{ translations.signup }}</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slider-buttons">
+                <button class="slider-btn" id="prevBtn" onclick="changeSlide(-1)">← {% if lang == 'es' %}Anterior{% else %}Previous{% endif %}</button>
+                <div class="slide-indicator">
+                    <div class="indicator-dot active" onclick="goToSlide(0)"></div>
+                    <div class="indicator-dot" onclick="goToSlide(1)"></div>
+                    <div class="indicator-dot" onclick="goToSlide(2)"></div>
+                </div>
+                <button class="slider-btn" id="nextBtn" onclick="changeSlide(1)">{% if lang == 'es' %}Siguiente{% else %}Next{% endif %} →</button>
+            </div>
         </div>
     </div>
+    
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 3;
+        
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide < 0) currentSlide = 0;
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            updateSlider();
+        }
+        
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlider();
+        }
+        
+        function updateSlider() {
+            const slider = document.getElementById('slider');
+            slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            // Actualizar indicadores
+            const indicators = document.querySelectorAll('.indicator-dot');
+            indicators.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+            
+            // Actualizar botones
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+        
+        updateSlider();
+    </script>
 </body>
 </html>
