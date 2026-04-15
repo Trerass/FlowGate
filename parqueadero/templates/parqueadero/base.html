@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ lang|default:'es' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FlowGate{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'parqueadero/css/base.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="navbar-brand">FlowGate</a>
+            <ul class="navbar-menu">
+                <li><a href="/?lang={{ lang }}">Home</a></li>
+                <li><a href="/payments/?lang={{ lang }}">{{ translations.payments }}</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="/profile/?lang={{ lang }}">{{ translations.profile }}</a></li>
+                    <li><a href="/history/?lang={{ lang }}">{{ translations.history }}</a></li>
+                    <li>
+                        <form class="inline-form" method="post" action="/logout/">
+                            {% csrf_token %}
+                            <button type="submit">{{ translations.logout }} ({{ user.username }})</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="/login/?lang={{ lang }}">{{ translations.login }}</a></li>
+                {% endif %}
+                <li class="language-selector">
+                    <a href="?lang=es" class="{% if lang == 'es' %}active{% endif %}">ES</a>
+                    <a href="?lang=en" class="{% if lang == 'en' %}active{% endif %}">EN</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

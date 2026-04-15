@@ -1,0 +1,42 @@
+{% extends "parqueadero/base.html" %}
+{% load static %}
+
+{% block title %}Home - FlowGate{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'parqueadero/css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">{{ translations.welcome }}</h1>
+
+<section class="card-section">
+    <div class="section-title">{{ translations.weather }} {% if congestion %}y {{ translations.congestion }}{% endif %}</div>
+    <div class="weather-box">{{ weather }}</div>
+    <div class="congestion-box">{{ translations.congestion }}: {{ congestion }}</div>
+</section>
+
+<section class="card-section">
+    <div class="section-title">{{ translations.parking_status }}</div>
+    <div class="parking-grid">
+        {% for p in parqueaderos %}
+            <article class="parking-card">
+                <div class="parking-name">{{ p.nombre }}</div>
+                <div class="parking-stat"><strong>{{ translations.capacity }}:</strong> {{ p.capacidad }}</div>
+                <div class="parking-stat"><strong>{{ translations.occupancy }}:</strong> {{ p.ocupancia }} / {{ p.capacidad }}</div>
+                <div class="occupancy-bar">
+                    <div class="occupancy-fill" style="width: {{ p.ocupancia_percent }}%;"></div>
+                </div>
+                <div class="occupancy-percent">{{ p.ocupancia_percent }}%</div>
+                {% for e in p.entradas %}
+                    <div class="entrance-info">
+                        <div class="entrance-label">{{ translations.entrance }}: {{ e.nombre }}</div>
+                        <div class="entrance-detail">{{ translations.queue }}: <strong>{{ e.fila }}</strong></div>
+                        <div class="entrance-detail">{{ translations.waiting_time }}: <strong>{{ e.tiempo_espera }} {{ translations.minutes }}</strong></div>
+                    </div>
+                {% endfor %}
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

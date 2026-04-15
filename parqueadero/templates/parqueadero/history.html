@@ -1,0 +1,62 @@
+{% extends "parqueadero/base.html" %}
+{% load static %}
+
+{% block title %}History - FlowGate{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'parqueadero/css/history.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <h1 class="page-title">{{ translations.history }}</h1>
+    <section class="history-section">
+        <div class="section-title">Registro de Entradas y Salidas</div>
+        {% if historial %}
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Parqueadero</th>
+                            <th>Entrada</th>
+                            <th>Hora Entrada</th>
+                            <th>Hora Salida</th>
+                            <th>Costo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for registro in historial %}
+                            <tr>
+                                <td class="date-cell">{{ registro.fecha|date:"d/m/Y" }}</td>
+                                <td class="parking-name">{{ registro.parqueadero.nombre }}</td>
+                                <td>{{ registro.entrada.nombre|default:"N/A" }}</td>
+                                <td class="time-cell">{{ registro.hora_entrada|time:"H:i" }}</td>
+                                <td class="time-cell">
+                                    {% if registro.hora_salida %}
+                                        {{ registro.hora_salida|time:"H:i" }}
+                                    {% else %}
+                                        <span class="active-status">Activo</span>
+                                    {% endif %}
+                                </td>
+                                <td class="price-cell">
+                                    {% if registro.costo == 0 %}
+                                        <span class="free-price">Gratis</span>
+                                    {% else %}
+                                        ${{ registro.costo|stringformat:",.0f" }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">Sin registros aun</div>
+                <p>No hay registros de entradas y salidas aun.</p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
