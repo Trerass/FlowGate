@@ -8,81 +8,147 @@
 {% endblock %}
 
 {% block content %}
-<div class="profile-container">
-    <h1 class="page-title">{{ user.username }} - {{ translations.profile }}</h1>
+<section class="profile-hero animate-in" data-animate="profile-hero">
+    <div class="avatar-shell">{{ full_name|slice:":1"|upper }}</div>
+    <div>
+        <h1>{{ full_name }}</h1>
+        <p>{{ user.email|default:"sin-correo@flowgate.app" }}</p>
+        <span>Codigo: {{ perfil.codigo_estudiantil|default:"N/A" }}</span>
+    </div>
+</section>
 
-    <section class="profile-section">
-        <div class="section-title">{{ translations.user_info }}</div>
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Username</div>
-                <div class="info-value">{{ user.username }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">{{ translations.email }}</div>
-                <div class="info-value">{{ user.email }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">{{ translations.phone }}</div>
-                <div class="info-value">{{ perfil.telefono|default:"No registrado" }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">{{ translations.student_code }}</div>
-                <div class="info-value">{{ perfil.codigo_estudiantil|default:"No registrado" }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">{{ translations.user_type }}</div>
-                <div class="info-value">{% if perfil.tipo_usuario == 'estudiante' %}Estudiante{% else %}Profesor{% endif %}</div>
-            </div>
+<div class="tab-shell animate-in" data-animate="profile-tabs">
+    <a href="{% url 'profile' %}?lang={{ lang }}&tab=info" class="tab-link {% if active_tab == 'info' %}active{% endif %}">{{ translations.personal_info }}</a>
+    <a href="{% url 'profile' %}?lang={{ lang }}&tab=history" class="tab-link {% if active_tab == 'history' %}active{% endif %}">{{ translations.history }}</a>
+</div>
+
+{% if active_tab == "history" %}
+    <section class="surface-card animate-in" data-animate="profile-history">
+        <div class="section-row">
+            <h2>{{ translations.history }}</h2>
         </div>
-    </section>
-
-    <section class="profile-section">
-        {% if vehiculo %}
-            <div class="vehicle-card">
-                <div class="section-title vehicle-title">{{ translations.vehicle_info }}</div>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">{{ translations.plate }}</div>
-                        <div class="info-value">{{ vehiculo.placa }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">{{ translations.brand }}</div>
-                        <div class="info-value">{{ vehiculo.marca }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">{{ translations.model }}</div>
-                        <div class="info-value">{{ vehiculo.modelo }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">{{ translations.color }}</div>
-                        <div class="info-value">{{ vehiculo.color }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">{{ translations.vehicle_type }}</div>
-                        <div class="info-value">{{ vehiculo.tipo_vehiculo|upper }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">{{ translations.electric }}</div>
-                        <div class="info-value">{% if vehiculo.es_electrico %}Si{% else %}No{% endif %}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">{{ translations.daily_price }}</div>
-                        <div class="info-value">
-                            {% if vehiculo.precio_diario == 0 %}
-                                <span class="price-badge free">{{ translations.free }}</span>
-                            {% else %}
-                                <span class="price-badge">${{ vehiculo.precio_diario|stringformat:",.0f" }}</span>
-                            {% endif %}
+        {% if historial %}
+            <div class="history-list">
+                {% for registro in historial %}
+                    <div class="history-item">
+                        <div>
+                            <strong>{{ registro.parqueadero.nombre }}</strong>
+                            <p>{{ registro.fecha|date:"d/m/Y" }} · {{ registro.hora_entrada|time:"H:i" }}</p>
+                        </div>
+                        <div class="history-meta">
+                            <span>{% if registro.entrada %}{{ registro.entrada.nombre }}{% else %}N/A{% endif %}</span>
+                            <strong>{% if registro.costo == 0 %}{{ translations.free }}{% else %}${{ registro.costo|stringformat:",.0f" }}{% endif %}</strong>
                         </div>
                     </div>
-                </div>
+                {% endfor %}
             </div>
         {% else %}
-            <div class="no-vehicle">
-                <p>No hay informacion de vehiculo registrada. Por favor, contacta con administracion para registrar tu vehiculo.</p>
-            </div>
+            <p class="empty-copy">No hay registros de historial todavia.</p>
         {% endif %}
     </section>
-</div>
+{% else %}
+    <section class="surface-card animate-in" data-animate="profile-info">
+        <div class="section-row">
+            <h2>{{ translations.personal_info }}</h2>
+        </div>
+        <form method="post" class="profile-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_profile">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="full_name">{{ translations.full_name }}</label>
+                    <input type="text" id="full_name" name="full_name" value="{{ full_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">{{ translations.email }}</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}">
+                </div>
+                <div class="form-group">
+                    <label for="telefono">{{ translations.phone }}</label>
+                    <input type="text" id="telefono" name="telefono" value="{{ perfil.telefono }}">
+                </div>
+                <div class="form-group">
+                    <label for="codigo_estudiantil">{{ translations.student_code }}</label>
+                    <input type="text" id="codigo_estudiantil" name="codigo_estudiantil" value="{{ perfil.codigo_estudiantil }}">
+                </div>
+                <div class="form-group">
+                    <label for="tipo_usuario">{{ translations.user_type }}</label>
+                    <select id="tipo_usuario" name="tipo_usuario">
+                        <option value="estudiante" {% if perfil.tipo_usuario == 'estudiante' %}selected{% endif %}>Estudiante</option>
+                        <option value="profesor" {% if perfil.tipo_usuario == 'profesor' %}selected{% endif %}>Profesor</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="primary-action">{{ translations.save_changes }}</button>
+        </form>
+    </section>
+
+    <section class="surface-card animate-in" data-animate="profile-vehicle">
+        <div class="section-row">
+            <h2>{{ translations.registered_vehicle }}</h2>
+        </div>
+        <form method="post" class="profile-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_vehicle">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="placa">{{ translations.plate }}</label>
+                    <input type="text" id="placa" name="placa" value="{% if vehiculo %}{{ vehiculo.placa }}{% endif %}" required>
+                </div>
+                <div class="form-group">
+                    <label for="marca">{{ translations.brand }}</label>
+                    <input type="text" id="marca" name="marca" value="{% if vehiculo %}{{ vehiculo.marca }}{% endif %}" required>
+                </div>
+                <div class="form-group">
+                    <label for="modelo">{{ translations.model }}</label>
+                    <input type="text" id="modelo" name="modelo" value="{% if vehiculo %}{{ vehiculo.modelo }}{% endif %}" required>
+                </div>
+                <div class="form-group">
+                    <label for="color">{{ translations.color }}</label>
+                    <input type="text" id="color" name="color" value="{% if vehiculo %}{{ vehiculo.color }}{% endif %}" required>
+                </div>
+                <div class="form-group">
+                    <label for="tipo_vehiculo">{{ translations.vehicle_type }}</label>
+                    <select id="tipo_vehiculo" name="tipo_vehiculo">
+                        <option value="carro" {% if vehiculo and vehiculo.tipo_vehiculo == 'carro' %}selected{% endif %}>Automovil</option>
+                        <option value="moto" {% if vehiculo and vehiculo.tipo_vehiculo == 'moto' %}selected{% endif %}>Motocicleta</option>
+                    </select>
+                </div>
+                <div class="form-group switch-group">
+                    <label class="checkbox-row" for="es_electrico">
+                        <input type="checkbox" id="es_electrico" name="es_electrico" {% if vehiculo and vehiculo.es_electrico %}checked{% endif %}>
+                        <span>{{ translations.electric }}</span>
+                    </label>
+                </div>
+            </div>
+            <div class="rate-preview">
+                <span>{{ translations.current_rate }}</span>
+                <strong>
+                    {% if vehiculo %}
+                        {% if vehiculo.precio_diario == 0 %}{{ translations.free }}{% else %}${{ vehiculo.precio_diario|stringformat:",.0f" }} / dia{% endif %}
+                    {% else %}
+                        $8700 / dia
+                    {% endif %}
+                </strong>
+            </div>
+            <div class="action-row">
+                <button type="submit" class="primary-action">{{ translations.save_changes }}</button>
+                {% if vehiculo %}
+                    <button type="submit" class="danger-action" name="action" value="delete_vehicle">{{ translations.delete_vehicle }}</button>
+                {% endif %}
+            </div>
+        </form>
+    </section>
+
+    <section class="surface-card danger-zone animate-in" data-animate="profile-danger">
+        <div class="section-row">
+            <h2>{{ translations.account_settings }}</h2>
+        </div>
+        <p>Si eliminas la cuenta, tambien se eliminaran tus datos asociados, tu vehiculo y tu historial.</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="danger-action" name="action" value="delete_account">{{ translations.delete_account }}</button>
+        </form>
+    </section>
+{% endif %}
 {% endblock %}

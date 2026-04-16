@@ -1,0 +1,42 @@
+{% extends "parqueadero/base.html" %}
+{% load static %}
+
+{% block title %}On The Way - FlowGate{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'parqueadero/css/heading.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="heading-header animate-in" data-animate="heading-header">
+    <h1>{{ translations.on_the_way }}</h1>
+    <p>Avisa que vas en camino para obtener mejor informacion y reservar tu espacio.</p>
+</section>
+
+<form method="get" class="heading-form">
+    <input type="hidden" name="lang" value="{{ lang }}">
+    <section class="surface-panel animate-in" data-animate="heading-destination">
+        <h2>{{ translations.select_destination }}</h2>
+        <div class="destination-grid animate-stagger" data-animate="heading-cards">
+            {% for option in parking_options %}
+                <label class="destination-card {% if option.selected %}selected{% endif %}">
+                    <input type="radio" name="parking" value="{{ option.nombre }}" {% if option.selected %}checked{% endif %}>
+                    <strong>{{ option.nombre }}</strong>
+                    <span>{{ option.projected_available }} {{ translations.available }}</span>
+                </label>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="surface-panel animate-in" data-animate="heading-eta">
+        <h2>{{ translations.eta }}</h2>
+        <div class="eta-shell">
+            <input type="range" name="eta" min="5" max="60" step="5" value="{{ eta }}" oninput="this.nextElementSibling.querySelector('strong').innerText = this.value">
+            <div class="eta-value"><strong>{{ eta }}</strong><span>{{ translations.minutes }}</span></div>
+        </div>
+        <div class="eta-note">Nota: El sistema ajustara automaticamente la disponibilidad basandose en tu tiempo estimado de llegada.</div>
+    </section>
+
+    <button type="submit" class="trip-button">{{ translations.start_trip }}</button>
+</form>
+{% endblock %}

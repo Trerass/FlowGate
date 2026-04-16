@@ -1,42 +1,144 @@
 {% extends "parqueadero/base.html" %}
 {% load static %}
 
-{% block title %}Home - FlowGate{% endblock %}
+{% block title %}Dashboard - FlowGate{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'parqueadero/css/home.css' %}">
 {% endblock %}
 
 {% block content %}
-<h1 class="page-title">{{ translations.welcome }}</h1>
-
-<section class="card-section">
-    <div class="section-title">{{ translations.weather }} {% if congestion %}y {{ translations.congestion }}{% endif %}</div>
-    <div class="weather-box">{{ weather }}</div>
-    <div class="congestion-box">{{ translations.congestion }}: {{ congestion }}</div>
+<section class="hero-panel animate-in" data-animate="hero">
+    <div>
+        <h1 class="hero-title">{{ translations.welcome }}</h1>
+        <p class="hero-kicker">{{ translations.dashboard }} en tiempo real</p>
+        <p class="hero-subtitle">{{ translations.updated_at }}: {{ updated_at }}</p>
+    </div>
+    <a href="{% url 'home' %}?lang={{ lang }}" class="action-pill">{{ translations.update }}</a>
 </section>
 
-<section class="card-section">
-    <div class="section-title">{{ translations.parking_status }}</div>
-    <div class="parking-grid">
+<section class="advisory-card animate-in" data-animate="advisory">
+    <div class="advisory-icon">!</div>
+    <div>
+        <h2>{{ recommendation.title }}</h2>
+        <p>{{ recommendation.text }}</p>
+        <div class="advisory-meta">
+            <span>{{ translations.waiting_time }}: ~{{ recommendation.wait_time }} {{ translations.minutes }}</span>
+            <span>{{ translations.available_slots }}: {{ summary.available_slots }}</span>
+        </div>
+    </div>
+</section>
+
+<section class="insight-grid animate-stagger" data-animate="insights">
+    <article class="insight-card weather-card weather-{{ weather.icon }} lift-card">
+        <div class="weather-scene" aria-hidden="true">
+            <div class="weather-glow"></div>
+            <div class="weather-orb weather-orb-one"></div>
+            <div class="weather-orb weather-orb-two"></div>
+            <div class="weather-ground"></div>
+        </div>
+        <div class="weather-top">
+            <div class="insight-heading">{{ translations.weather }}</div>
+            <div class="weather-icon">
+                {% if weather.icon == "sun" %}
+                    ☀️
+                {% elif weather.icon == "rain" %}
+                    🌧️
+                {% else %}
+                    ☁️
+                {% endif %}
+            </div>
+        </div>
+        <div class="weather-main">
+            <span class="count-up" data-count="{{ weather.temperature }}">0</span>&deg;C
+        </div>
+        <div class="weather-state">{{ weather.label }}</div>
+        <div class="weather-description">{{ weather.description }}</div>
+        <div class="weather-extra-grid">
+            <div class="metric-pill">
+                <span class="mini-label">Humedad</span>
+                <strong><span class="count-up" data-count="{{ weather.humidity }}">0</span>%</strong>
+            </div>
+            <div class="metric-pill">
+                <span class="mini-label">Viento</span>
+                <strong><span class="count-up" data-count="{{ weather.wind_speed }}">0</span> km/h</strong>
+            </div>
+        </div>
+    </article>
+
+    <article class="insight-card lift-card">
+        <div class="insight-header">
+            <div class="insight-heading">{{ translations.congestion }}</div>
+            <span class="status-badge status-warning">{{ congestion.label }}</span>
+        </div>
+        <div class="mini-label">{{ translations.status }}</div>
+        <div class="metric-bar">
+            <div class="metric-fill warning animate-bar" data-width="{{ congestion.percent }}"></div>
+        </div>
+        <div class="metric-caption"><span class="count-up" data-count="{{ congestion.percent }}">0</span>% de congestion</div>
+        <div class="speed-card">
+            <span class="mini-label">{{ translations.avg_speed }}</span>
+            <strong><span class="count-up" data-count="{{ congestion.average_speed }}">0</span> km/h</strong>
+        </div>
+    </article>
+</section>
+
+<section class="section-shell animate-in" data-animate="parking">
+    <h2 class="section-title dark">{{ translations.parking_status }}</h2>
+    <div class="parking-grid animate-stagger" data-animate="parking-cards">
         {% for p in parqueaderos %}
-            <article class="parking-card">
-                <div class="parking-name">{{ p.nombre }}</div>
-                <div class="parking-stat"><strong>{{ translations.capacity }}:</strong> {{ p.capacidad }}</div>
-                <div class="parking-stat"><strong>{{ translations.occupancy }}:</strong> {{ p.ocupancia }} / {{ p.capacidad }}</div>
-                <div class="occupancy-bar">
-                    <div class="occupancy-fill" style="width: {{ p.ocupancia_percent }}%;"></div>
+            <article class="parking-card tone-{{ p.status.tone }} lift-card">
+                <div class="parking-card-header">
+                    <h3>{{ p.nombre }}</h3>
+                    <span class="status-badge status-{{ p.status.tone }}">{{ p.status.text }}</span>
                 </div>
-                <div class="occupancy-percent">{{ p.ocupancia_percent }}%</div>
-                {% for e in p.entradas %}
-                    <div class="entrance-info">
-                        <div class="entrance-label">{{ translations.entrance }}: {{ e.nombre }}</div>
-                        <div class="entrance-detail">{{ translations.queue }}: <strong>{{ e.fila }}</strong></div>
-                        <div class="entrance-detail">{{ translations.waiting_time }}: <strong>{{ e.tiempo_espera }} {{ translations.minutes }}</strong></div>
-                    </div>
-                {% endfor %}
+                <div class="parking-numbers">
+                    <strong><span class="count-up" data-count="{{ p.ocupancia }}">0</span></strong><span>/{{ p.capacidad }}</span>
+                    <span class="availability"><span class="count-up" data-count="{{ p.available_slots }}">0</span> {{ translations.available }}</span>
+                </div>
+                <div class="metric-bar">
+                    <div class="metric-fill {{ p.status.tone }} animate-bar" data-width="{{ p.ocupancia_percent }}"></div>
+                </div>
+                <div class="metric-caption"><span class="count-up" data-count="{{ p.ocupancia_percent }}">0</span>% {{ translations.occupied }}</div>
+
+                <div class="entrance-block">
+                    <div class="entrance-title">Estado de Entradas</div>
+                    {% for e in p.entradas %}
+                        <div class="entrance-row">
+                            <span>{{ e.nombre }}</span>
+                            <div class="entrance-metrics">
+                                <span>
+                                    {% if e.fila > 0 %}
+                                        <span class="count-up" data-count="{{ e.fila }}">0</span> en fila
+                                    {% else %}
+                                        sin fila
+                                    {% endif %}
+                                </span>
+                                <strong><span class="count-up" data-count="{{ e.tiempo_espera }}">0</span> {{ translations.minutes }}</strong>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             </article>
         {% endfor %}
+    </div>
+</section>
+
+<section class="summary-card animate-in" data-animate="summary">
+    <h2 class="section-title dark">{{ translations.summary }}</h2>
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span>{{ translations.total_slots }}</span>
+            <strong class="number-blue"><span class="count-up" data-count="{{ summary.total_slots }}">0</span></strong>
+        </div>
+        <div class="summary-item">
+            <span>{{ translations.occupied_slots }}</span>
+            <strong class="number-purple"><span class="count-up" data-count="{{ summary.occupied_slots }}">0</span></strong>
+        </div>
+        <div class="summary-item">
+            <span>{{ translations.available_slots }}</span>
+            <strong class="number-green"><span class="count-up" data-count="{{ summary.available_slots }}">0</span></strong>
+        </div>
     </div>
 </section>
 {% endblock %}

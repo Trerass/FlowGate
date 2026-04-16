@@ -5,11 +5,9 @@ from parqueadero.services import TRANSLATIONS, get_lang, get_parking_data
 
 def home(request):
     lang = get_lang(request)
-    parqueadero_data, weather, congestion = get_parking_data(lang)
+    dashboard_data = get_parking_data(lang)
     context = {
-        "parqueaderos": parqueadero_data,
-        "weather": weather,
-        "congestion": congestion,
+        **dashboard_data,
         "lang": lang,
         "translations": TRANSLATIONS[lang],
         "user": request.user,

@@ -8,55 +8,57 @@
 {% endblock %}
 
 {% block content %}
-<div class="history-container">
-    <h1 class="page-title">{{ translations.history }}</h1>
-    <section class="history-section">
-        <div class="section-title">Registro de Entradas y Salidas</div>
-        {% if historial %}
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Parqueadero</th>
-                            <th>Entrada</th>
-                            <th>Hora Entrada</th>
-                            <th>Hora Salida</th>
-                            <th>Costo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for registro in historial %}
-                            <tr>
-                                <td class="date-cell">{{ registro.fecha|date:"d/m/Y" }}</td>
-                                <td class="parking-name">{{ registro.parqueadero.nombre }}</td>
-                                <td>{{ registro.entrada.nombre|default:"N/A" }}</td>
-                                <td class="time-cell">{{ registro.hora_entrada|time:"H:i" }}</td>
-                                <td class="time-cell">
-                                    {% if registro.hora_salida %}
-                                        {{ registro.hora_salida|time:"H:i" }}
-                                    {% else %}
-                                        <span class="active-status">Activo</span>
-                                    {% endif %}
-                                </td>
-                                <td class="price-cell">
-                                    {% if registro.costo == 0 %}
-                                        <span class="free-price">Gratis</span>
-                                    {% else %}
-                                        ${{ registro.costo|stringformat:",.0f" }}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div class="empty-state">
-                <div class="empty-state-icon">Sin registros aun</div>
-                <p>No hay registros de entradas y salidas aun.</p>
-            </div>
-        {% endif %}
-    </section>
-</div>
+<section class="history-header">
+    <h1>{{ translations.history }}</h1>
+    <p>{{ translations.history_title }}</p>
+</section>
+
+<section class="history-shell">
+    {% if historial %}
+        <div class="history-grid">
+            {% for registro in historial %}
+                <article class="history-card">
+                    <div class="history-card-top">
+                        <div>
+                            <h2>{{ registro.parqueadero.nombre }}</h2>
+                            <p>{{ registro.fecha|date:"d/m/Y" }}</p>
+                        </div>
+                        <span class="history-cost">
+                            {% if registro.costo == 0 %}
+                                {{ translations.free }}
+                            {% else %}
+                                ${{ registro.costo|stringformat:",.0f" }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="history-meta-grid">
+                        <div>
+                            <span class="mini-label">{{ translations.entrance }}</span>
+                            <strong>{{ registro.entrada.nombre|default:"N/A" }}</strong>
+                        </div>
+                        <div>
+                            <span class="mini-label">Entrada</span>
+                            <strong>{{ registro.hora_entrada|time:"H:i" }}</strong>
+                        </div>
+                        <div>
+                            <span class="mini-label">Salida</span>
+                            <strong>
+                                {% if registro.hora_salida %}
+                                    {{ registro.hora_salida|time:"H:i" }}
+                                {% else %}
+                                    {{ translations.active }}
+                                {% endif %}
+                            </strong>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">Sin registros aun</div>
+            <p>No hay registros de entradas y salidas aun.</p>
+        </div>
+    {% endif %}
+</section>
 {% endblock %}

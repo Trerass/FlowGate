@@ -1,33 +1,209 @@
-.payments-container {
+.payments-header {
+    margin-bottom: 24px;
+}
+
+.payments-header h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.payments-header p {
+    color: var(--muted);
+    font-size: 1.08rem;
+}
+
+.balance-card {
+    background: linear-gradient(120deg, #2962f2, #7e37ff 48%, #ea007b);
+    border-radius: 30px;
+    box-shadow: var(--shadow);
+    color: #fff;
+    display: grid;
+    gap: 22px;
+    margin-bottom: 28px;
+    padding: 34px 38px;
+    position: relative;
+    transition: transform 0.26s ease, box-shadow 0.26s ease;
+}
+
+.balance-card:hover {
+    box-shadow: 0 24px 48px rgba(72, 52, 154, 0.2);
+    transform: translateY(-2px);
+}
+
+.balance-card::after {
+    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.28), transparent 45%);
+    content: "";
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+}
+
+.balance-main span {
+    display: block;
+    font-size: 1.1rem;
+}
+
+.balance-main strong {
+    display: block;
+    font-size: 4rem;
+    font-weight: 800;
+    margin-top: 6px;
+}
+
+.recharge-form {
+    align-items: center;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 1fr 180px;
+}
+
+.recharge-form input {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.recharge-button {
     background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    margin: 50px auto;
-    max-width: 500px;
-    padding: 40px;
+    color: var(--primary);
+    min-height: 54px;
 }
 
-.payment-info {
-    background: #f9f9f9;
-    border-left: 4px solid #667eea;
-    border-radius: 8px;
-    margin-top: 20px;
-    padding: 15px;
+.balance-note {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 22px;
+    padding: 22px;
 }
 
-.payment-info.success {
-    background: #e8f5e9;
-    border-left-color: #4caf50;
-    color: #2e7d32;
+.balance-note span {
+    display: block;
+    opacity: 0.9;
 }
 
-.payment-info.empty {
-    background: #fff3e0;
-    border-left-color: #ff9800;
-    color: #e65100;
+.balance-note p {
+    font-size: 1.1rem;
+    margin-top: 10px;
 }
 
-.info-title {
-    font-weight: 600;
-    margin-bottom: 5px;
+.payments-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: 28px;
+    overflow: hidden;
+}
+
+.tab-item {
+    color: #51607c;
+    font-size: 1.2rem;
+    padding: 22px;
+    text-align: center;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.tab-item.active {
+    border-bottom: 3px solid var(--primary);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.tab-item:hover {
+    background: #fafcff;
+    color: var(--primary);
+}
+
+.surface-panel {
+    margin-bottom: 28px;
+    padding: 30px;
+}
+
+.surface-panel h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.rates-list {
+    display: grid;
+    gap: 18px;
+}
+
+.rate-card {
+    border: 2px solid #dcebff;
+    border-radius: 24px;
+    padding: 26px 30px;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.rate-card:hover {
+    border-color: rgba(41, 98, 242, 0.26);
+    box-shadow: 0 16px 28px rgba(39, 76, 144, 0.08);
+    transform: translateY(-3px);
+}
+
+.rate-card.tone-success {
+    background: #ecfff3;
+    border-color: rgba(11, 187, 83, 0.42);
+}
+
+.rate-card.tone-soft {
+    background: #f9fbff;
+}
+
+.rate-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.rate-header h3 {
+    font-size: 1.6rem;
+}
+
+.rate-card p {
+    color: var(--muted);
+    margin-bottom: 18px;
+}
+
+.rate-value {
+    color: var(--primary);
+    font-size: 2.2rem;
+    font-weight: 800;
+}
+
+.rate-tag {
+    background: var(--success);
+    border-radius: 999px;
+    color: #fff;
+    padding: 10px 16px;
+}
+
+.info-banner {
+    background: linear-gradient(180deg, #fff8dc, #fff8e8);
+    border: 1px solid rgba(245, 180, 0, 0.38);
+    border-radius: 26px;
+    box-shadow: var(--shadow);
+    padding: 28px 30px;
+}
+
+.info-banner h3 {
+    color: #9b6200;
+    font-size: 1.8rem;
+    margin-bottom: 14px;
+}
+
+.info-banner ul {
+    color: #9b6200;
+    display: grid;
+    gap: 12px;
+    padding-left: 20px;
+}
+
+@media (max-width: 960px) {
+    .recharge-form,
+    .payments-tabs {
+        grid-template-columns: 1fr;
+    }
+
+    .balance-main strong {
+        font-size: 3rem;
+    }
 }

@@ -1,0 +1,113 @@
+.heading-header {
+    margin-bottom: 24px;
+}
+
+.heading-header h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.heading-header p {
+    color: var(--muted);
+    font-size: 1.08rem;
+}
+
+.heading-form {
+    display: grid;
+    gap: 24px;
+}
+
+.surface-panel {
+    padding: 28px;
+}
+
+.surface-panel h2 {
+    font-size: 2rem;
+    margin-bottom: 22px;
+}
+
+.destination-grid {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.destination-card {
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    cursor: pointer;
+    display: grid;
+    gap: 12px;
+    padding: 20px;
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.destination-card input {
+    display: none;
+}
+
+.destination-card.selected {
+    border-color: rgba(41, 98, 242, 0.4);
+    box-shadow: 0 8px 18px rgba(41, 98, 242, 0.08);
+}
+
+.destination-card:hover {
+    border-color: rgba(41, 98, 242, 0.22);
+    box-shadow: 0 12px 22px rgba(41, 98, 242, 0.08);
+    transform: translateY(-2px);
+}
+
+.destination-card strong {
+    font-size: 1.25rem;
+}
+
+.destination-card span {
+    color: var(--muted);
+}
+
+.eta-shell {
+    align-items: center;
+    display: grid;
+    gap: 22px;
+    grid-template-columns: 1fr 110px;
+}
+
+.eta-shell input[type="range"] {
+    min-height: auto;
+    padding: 0;
+}
+
+.eta-value {
+    color: var(--primary);
+    text-align: center;
+    transition: transform 0.22s ease;
+}
+
+.eta-value strong {
+    display: block;
+    font-size: 3rem;
+}
+
+.surface-panel:hover .eta-value {
+    transform: scale(1.02);
+}
+
+.eta-note {
+    background: #edf3ff;
+    border-radius: 18px;
+    color: #536684;
+    margin-top: 16px;
+    padding: 18px;
+}
+
+.trip-button {
+    padding: 20px 28px;
+}
+
+@media (max-width: 960px) {
+    .destination-grid,
+    .eta-shell {
+        grid-template-columns: 1fr;
+    }
+}

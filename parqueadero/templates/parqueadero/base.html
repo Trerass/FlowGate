@@ -9,33 +9,56 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <div class="page-background" aria-hidden="true">
+        <div class="bg-orb bg-orb-left"></div>
+        <div class="bg-orb bg-orb-right"></div>
+        <div class="bg-orb bg-orb-bottom"></div>
+        <div class="bg-grid"></div>
+    </div>
     <nav class="navbar">
         <div class="navbar-content">
-            <a href="/" class="navbar-brand">FlowGate</a>
+            <a href="{% url 'home' %}?lang={{ lang }}" class="navbar-brand">
+                <span class="brand-mark">FG</span>
+                <span>FlowGate</span>
+            </a>
+
             <ul class="navbar-menu">
-                <li><a href="/?lang={{ lang }}">Home</a></li>
-                <li><a href="/payments/?lang={{ lang }}">{{ translations.payments }}</a></li>
-                {% if user.is_authenticated %}
-                    <li><a href="/profile/?lang={{ lang }}">{{ translations.profile }}</a></li>
-                    <li><a href="/history/?lang={{ lang }}">{{ translations.history }}</a></li>
-                    <li>
-                        <form class="inline-form" method="post" action="/logout/">
-                            {% csrf_token %}
-                            <button type="submit">{{ translations.logout }} ({{ user.username }})</button>
-                        </form>
-                    </li>
-                {% else %}
-                    <li><a href="/login/?lang={{ lang }}">{{ translations.login }}</a></li>
-                {% endif %}
-                <li class="language-selector">
-                    <a href="?lang=es" class="{% if lang == 'es' %}active{% endif %}">ES</a>
-                    <a href="?lang=en" class="{% if lang == 'en' %}active{% endif %}">EN</a>
-                </li>
+                <li><a href="{% url 'home' %}?lang={{ lang }}" class="nav-link">{{ translations.dashboard }}</a></li>
+                <li><a href="{% url 'payments' %}?lang={{ lang }}" class="nav-link">{{ translations.payments }}</a></li>
+                <li><a href="{% url 'heading' %}?lang={{ lang }}" class="nav-link">{{ translations.on_the_way }}</a></li>
+                <li><a href="{% url 'profile' %}?lang={{ lang }}" class="nav-link">{{ translations.profile }}</a></li>
             </ul>
+
+            <div class="nav-actions">
+                <div class="language-selector">
+                    <a href="{{ request.path }}?lang=es" class="{% if lang == 'es' %}active{% endif %}">ES</a>
+                    <a href="{{ request.path }}?lang=en" class="{% if lang == 'en' %}active{% endif %}">EN</a>
+                </div>
+
+                {% if user.is_authenticated %}
+                    <form class="inline-form" method="post" action="{% url 'logout_view' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-button secondary">{{ translations.logout }}</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login_view' %}?lang={{ lang }}" class="nav-button primary">{{ translations.login }}</a>
+                {% endif %}
+            </div>
         </div>
     </nav>
-    <main class="container">
+
+    <main class="container page-shell">
+        {% if messages %}
+            <div class="message-stack">
+                {% for message in messages %}
+                    <div class="message message-{{ message.tags|default:'info' }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
         {% block content %}{% endblock %}
     </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js" referrerpolicy="no-referrer"></script>
+    <script src="{% static 'parqueadero/js/app.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
