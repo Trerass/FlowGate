@@ -71,3 +71,4 @@ For questions or collaboration inquiries:
 
 - **Juan Antonio Buendia** - jabuendias@eafit.edu.co
 - **Jeronimo Contreras Sierra** - jcontreras@eafit.edu.co
+- **Juan Pablo Parra El Masri** - jpparrae@eafit.edu.co
