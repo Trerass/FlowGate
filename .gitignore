@@ -1,16 +1,17 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyc
 
 # Entorno virtual
 venv/
+.venv/
 
 # Base de datos
 db.sqlite3
 
+# Archivos estaticos de despliegue
+staticfiles/
+
 # Archivos del sistema
 .DS_Store
-venv/ 
-__pycache__/ 
-*.pyc 
-db.sqlite3 

@@ -1,0 +1,81 @@
+{% extends "parqueadero/base.html" %}
+{% load static %}
+
+{% block title %}Login - FlowGate{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'parqueadero/css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h1 class="auth-title">FlowGate</h1>
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+    <div class="auth-tabs">
+        <button class="auth-tab active" type="button" onclick="switchTab('login')">{{ translations.login }}</button>
+        <button class="auth-tab" type="button" onclick="switchTab('signup')">{{ translations.signup }}</button>
+    </div>
+    <form method="post" class="auth-form active" id="login-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="login">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit">{{ translations.login }}</button>
+    </form>
+    <form method="post" class="auth-form" id="signup-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="signup">
+        <div class="form-group">
+            <label for="signup_username">Username</label>
+            <input type="text" id="signup_username" name="signup_username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="signup_password">Password</label>
+            <input type="password" id="signup_password" name="signup_password" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">{{ translations.phone }}</label>
+            <input type="tel" id="phone" name="phone">
+        </div>
+        <div class="form-group">
+            <label for="codigo">{{ translations.student_code }}</label>
+            <input type="text" id="codigo" name="codigo">
+        </div>
+        <div class="form-group">
+            <label for="tipo_usuario">{{ translations.user_type }}</label>
+            <select id="tipo_usuario" name="tipo_usuario">
+                <option value="estudiante">Estudiante</option>
+                <option value="profesor">Profesor</option>
+            </select>
+        </div>
+        <button type="submit">{{ translations.signup }}</button>
+    </form>
+</div>
+
+<script>
+    function switchTab(tab) {
+        document.getElementById("login-form").classList.remove("active");
+        document.getElementById("signup-form").classList.remove("active");
+        document.querySelectorAll(".auth-tab").forEach((item) => item.classList.remove("active"));
+        if (tab === "login") {
+            document.getElementById("login-form").classList.add("active");
+            document.querySelectorAll(".auth-tab")[0].classList.add("active");
+        } else {
+            document.getElementById("signup-form").classList.add("active");
+            document.querySelectorAll(".auth-tab")[1].classList.add("active");
+        }
+    }
+</script>
+{% endblock %}

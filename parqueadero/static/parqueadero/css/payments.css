@@ -1,0 +1,33 @@
+.payments-container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin: 50px auto;
+    max-width: 500px;
+    padding: 40px;
+}
+
+.payment-info {
+    background: #f9f9f9;
+    border-left: 4px solid #667eea;
+    border-radius: 8px;
+    margin-top: 20px;
+    padding: 15px;
+}
+
+.payment-info.success {
+    background: #e8f5e9;
+    border-left-color: #4caf50;
+    color: #2e7d32;
+}
+
+.payment-info.empty {
+    background: #fff3e0;
+    border-left-color: #ff9800;
+    color: #e65100;
+}
+
+.info-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
