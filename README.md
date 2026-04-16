@@ -1,53 +1,73 @@
-# FlowGate
+# Flowgate
 
-FlowGate es una aplicacion web desarrollada con Django para visualizar el estado de los parqueaderos universitarios, consultar congestion en los accesos y gestionar funciones basicas de usuario como perfil, historial y pagos.
+## Overview
+Flowgate is a web application designed to track and visualize traffic congestion at the entrances of parking areas outside the university. The platform helps car owners make better decisions before heading to campus by providing real-time traffic insights, parking management options, and smart recommendations.
 
-## Funcionalidades
+With Flowgate, users can:
+- Check the current traffic status at parking entrances.
+- See how many people are currently heading toward the university in real time.
+- Pay for parking using virtual cards.
+- Reserve a parking spot in advance.
+- Receive recommendations based on traffic conditions and Medellin's weather forecast.
 
-- Visualizacion del estado de parqueaderos y filas por entrada.
-- Indicador de congestion general.
-- Soporte basico para dos idiomas.
-- Inicio de sesion y registro de usuarios.
-- Perfil del usuario y vehiculo.
-- Historial de ingresos al parqueadero.
-- Simulacion de pagos.
+The goal of Flowgate is to reduce congestion, improve parking efficiency, and enhance the overall commuting experience for university drivers.
 
-## Estructura del Proyecto
+---
 
-```text
-flowgate/
-- settings.py
-- urls.py
+## Features
+- **Traffic Severity Indicator**: Visual representation (bar) showing the level of traffic congestion at parking entrances.
+- **Real-Time Traffic Flow**: Live count of people currently on their way to the university.
+- **Parking Payments**: Secure parking payments using virtual cards.
+- **Parking Reservation**: Ability to reserve a parking spot ahead of time.
+- **Smart Recommendations**: Personalized recommendations based on traffic conditions and local weather forecasts.
 
-parqueadero/
-- models.py
-- admin.py
-- urls.py
-- services/
-- views/
-- templates/parqueadero/
-- static/parqueadero/css/
-- migrations/
-- tests/
-```
+---
 
-## Requisitos
+## Tech Stack
+- **Language & Framework**: Python 3.12 · Django 5
+- **Frontend**: Bootstrap 5
+- **Database**: SQLite (can be swapped for PostgreSQL or MySQL in production)
+- **Image Handling**: Pillow ≥ 10
 
-- Python 3.12 o superior
-- Django 5.2.11
+---
 
-## Ejecucion Local
+## Quick Start
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Trerass/FlowGate.git
+   cd FlowGate
+   ```
 
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
-```
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv .venv
+   .venv\Scripts\activate
+   ```
 
-## Notas
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-- El proyecto usa SQLite para simplificar la entrega.
-- La logica de vistas fue separada por responsabilidad y se movio la logica auxiliar a servicios para facilitar mantenimiento.
-- Los estilos fueron centralizados en archivos estaticos para evitar duplicacion entre templates.
+4. Apply migrations:
+   ```bash
+   python manage.py migrate
+   ```
+
+5. Run the development server:
+   ```bash
+   python manage.py runserver
+   ```
+
+6. Open the application:
+   ```text
+   http://127.0.0.1:8000/
+   ```
+
+---
+
+## Contact
+For questions or collaboration inquiries:
+
+- **Juan Antonio Buendia** - jabuendias@eafit.edu.co
+- **Jeronimo Contreras Sierra** - jcontreras@eafit.edu.co
