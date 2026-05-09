@@ -27,14 +27,47 @@
             {% endfor %}
         </div>
     </section>
+    <style>
+    /* El CSS que te pasé antes va aquí */
+    .eta-range {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 10px;
+        outline: none;
+        cursor: pointer;
+    }
 
+    .eta-range::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        background: #2563eb;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .eta-range:active::-webkit-slider-thumb {
+        transform: scale(1.3);
+        background: #1e40af;
+    }
+    
+    /* Agrega el resto de los estilos aquí... */
+    </style>
     <section class="surface-panel animate-in" data-animate="heading-eta">
-        <h2>{{ translations.eta }}</h2>
-        <div class="eta-shell">
-            <input type="range" name="eta" min="5" max="60" step="5" value="{{ eta }}" oninput="this.nextElementSibling.querySelector('strong').innerText = this.value">
-            <div class="eta-value"><strong>{{ eta }}</strong><span>{{ translations.minutes }}</span></div>
-        </div>
-        <div class="eta-note">Nota: El sistema ajustara automaticamente la disponibilidad basandose en tu tiempo estimado de llegada.</div>
+    <h2>{{ translations.eta }}</h2>
+    <div class="eta-shell">
+        <!-- Bajamos el step a 1 para suavidad total -->
+        <input type="range" name="eta" class="eta-range" min="5" max="60" step="1" value="{{ eta }}" 
+               oninput="this.nextElementSibling.querySelector('strong').innerText = this.value">
+        <div class="eta-value"><strong>{{ eta }}</strong><span>{{ translations.minutes }}</span></div>
+    </div>
+    <div class="eta-note" style="margin-top: 15px; font-size: 0.85rem; color: #6b7280; font-style: italic;">
+        Nota: El sistema ajustará automáticamente la disponibilidad basándose en tu tiempo estimado de llegada.
+    </div>
     </section>
 
     <button type="submit" class="trip-button">{{ translations.start_trip }}</button>

@@ -53,7 +53,101 @@
         {% endfor %}
     </div>
 </section>
+{% if user.is_authenticated %}
+    <!-- Sección de Gestión de Tarjetas -->
+     <style>
+        .credit-card-sim {
+            background-color: #1e40af; /* Azul oscuro coordinado */
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            width: 100%;
+            max-width: 845px;
+            margin: 20px auto;
+            color: white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            overflow: hidden; /* Para que la cinta negra no se salga */
+        }
 
+        /* La cinta negra superior (tipo banda magnética) */
+        .card-magnetic-strip {
+            background-color: #000;
+            height: 40px;
+            width: 100%;
+            position: absolute;
+            top: 20px;
+            left: 0;
+        }
+
+        /* Espaciador para que el contenido no toque la cinta negra */
+        .card-content {
+            margin-top: 50px; /* Empuja el contenido debajo de la cinta */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Estilo común para los inputs dentro de la tarjeta */
+        .card-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            color: white;
+            padding: 8px 10px;
+            outline: none;
+            font-family: 'Courier New', Courier, monospace; /* Fuente tipo tarjeta */
+        }
+
+        .card-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Configuración de anchuras específicas */
+        .w-75 {
+            width: calc(75% - 20px); /* 75% menos los márgenes de 10px por lado */
+            margin-left: 10px;
+        }
+
+        .row-between {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .short-input {
+            width: 80px;
+        }</style>
+    <section>
+        <div class="credit-card-sim">
+        <div class="card-magnetic-strip"></div>
+        
+        <form method="post" action="{% url 'payments' %}" class="card-content">
+            {% csrf_token %}
+            
+            <!-- Línea 1: Número de tarjeta (75% ancho) -->
+            <input type="text" name="card_number" placeholder="0000 0000 0000 0000" 
+                   class="card-input w-75" maxlength="19">
+
+            <!-- Línea 2: Fecha y CVV (Uno a cada lado) -->
+            <div class="row-between">
+                <input type="text" id="card_expiry" name="expiry" placeholder="MM/YY" 
+                       class="card-input short-input" maxlength="5">
+                
+                <input type="text" name="cvv" placeholder="CVV" 
+                       class="card-input short-input" maxlength="4">
+            </div>
+
+            <!-- Línea 3: Nombre del portador (75% ancho) -->
+            <input type="text" name="card_name" placeholder="NOMBRE DEL TITULAR" 
+                   class="card-input w-75" style="text-transform: uppercase;">
+
+            <button type="submit" class="recharge-button" style="margin-top: 10px; background-color: #ffffff; color: #1e40af; font-weight: bold;">
+                {{ translations.save_card | default:"Guardar Tarjeta y Efectuar Pago" }}
+            </button>
+        </form>
+        </div>
+    </section>
+{% endif %}
 {% if user.is_authenticated %}
     <section class="info-banner animate-in" data-animate="payments-info">
         <h3>{{ translations.important_info }}</h3>
