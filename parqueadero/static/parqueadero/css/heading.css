@@ -18,6 +18,75 @@
     gap: 24px;
 }
 
+.active-trip-panel {
+    background: linear-gradient(120deg, var(--primary), #4a73ff 58%, var(--purple));
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    color: #fff;
+    display: grid;
+    gap: 24px;
+    margin-bottom: 26px;
+    padding: 28px;
+}
+
+.active-trip-top {
+    align-items: flex-start;
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.trip-state {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.active-trip-panel h2 {
+    font-size: 2.2rem;
+    margin-bottom: 6px;
+}
+
+.active-trip-panel p {
+    opacity: 0.9;
+}
+
+.cancel-trip-button {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 16px;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 800;
+    min-height: 48px;
+    padding: 0 18px;
+}
+
+.trip-status-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.trip-status-grid div {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    padding: 18px;
+}
+
+.trip-status-grid span {
+    display: block;
+    opacity: 0.86;
+}
+
+.trip-status-grid strong {
+    display: block;
+    font-size: 2rem;
+    margin-top: 8px;
+}
+
 .surface-panel {
     padding: 28px;
 }
@@ -36,15 +105,21 @@
 .destination-card {
     border: 1px solid var(--line);
     border-radius: 20px;
-    cursor: pointer;
     display: grid;
-    gap: 12px;
+    gap: 16px;
     padding: 20px;
     transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
-.destination-card input {
+.destination-main input,
+.entry-option input {
     display: none;
+}
+
+.destination-main {
+    cursor: pointer;
+    display: grid;
+    gap: 12px;
 }
 
 .destination-card.selected {
@@ -64,6 +139,35 @@
 
 .destination-card span {
     color: var(--muted);
+}
+
+.entry-options {
+    display: grid;
+    gap: 10px;
+}
+
+.entry-option {
+    align-items: center;
+    background: #f8fbff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.entry-option:hover,
+.entry-option:has(input:checked) {
+    background: #eef4ff;
+    border-color: rgba(41, 98, 242, 0.28);
+}
+
+.entry-option small {
+    color: var(--muted);
+    font-weight: 700;
 }
 
 .eta-shell {
@@ -107,7 +211,12 @@
 
 @media (max-width: 960px) {
     .destination-grid,
-    .eta-shell {
+    .eta-shell,
+    .trip-status-grid {
         grid-template-columns: 1fr;
+    }
+
+    .active-trip-top {
+        flex-direction: column;
     }
 }

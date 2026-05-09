@@ -58,4 +58,28 @@
         <button type="submit" class="primary-action">Guardar disponibilidad</button>
     </form>
 </section>
+
+<section class="surface-card admin-section animate-in" data-animate="admin-notices">
+    <div class="section-row">
+        <h2>Avisos en camino</h2>
+    </div>
+    {% if avisos_en_camino %}
+        <div class="notice-list">
+            {% for aviso in avisos_en_camino %}
+                <article class="notice-item">
+                    <div>
+                        <strong>{{ aviso.usuario.user.username }}</strong>
+                        <p>{{ aviso.parqueadero.nombre }} - {{ aviso.entrada.nombre }}</p>
+                    </div>
+                    <div class="notice-meta">
+                        <span>{{ aviso.eta_minutos }} min</span>
+                        <strong>{% if aviso.agregado_a_fila %}Agregado a fila{% else %}Pendiente{% endif %}</strong>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-copy">No hay avisos en camino registrados.</p>
+    {% endif %}
+</section>
 {% endblock %}

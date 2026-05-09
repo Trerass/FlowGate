@@ -88,3 +88,20 @@ class Historial(models.Model):
     
     class Meta:
         ordering = ['-fecha', '-hora_entrada']
+
+
+class AvisoEnCamino(models.Model):
+    usuario = models.ForeignKey(PerfilUsuario, on_delete=models.CASCADE)
+    parqueadero = models.ForeignKey(Parqueadero, on_delete=models.CASCADE)
+    entrada = models.ForeignKey(Entrada, on_delete=models.CASCADE)
+    eta_minutos = models.IntegerField()
+    creado_en = models.DateTimeField(auto_now_add=True)
+    llegada_estimada = models.DateTimeField()
+    agregado_a_fila = models.BooleanField(default=False)
+    cancelado = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.usuario.user.username} -> {self.entrada.nombre}"
+
+    class Meta:
+        ordering = ['-creado_en']

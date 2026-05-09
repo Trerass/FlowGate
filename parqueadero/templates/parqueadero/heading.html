@@ -13,17 +13,70 @@
     <p>Avisa que vas en camino para obtener mejor informacion y reservar tu espacio.</p>
 </section>
 
-<form method="get" class="heading-form">
+{% if active_trip %}
+    <section class="active-trip-panel animate-in" data-animate="active-trip">
+        <div class="active-trip-top">
+            <div>
+                <span class="trip-state">Viaje inicializado</span>
+                <h2>{{ active_trip.parqueadero.nombre }}</h2>
+                <p>Entrada {{ active_trip.entrada_nombre }}</p>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="cancel_trip">
+                <button type="submit" class="cancel-trip-button">Cancelar viaje</button>
+            </form>
+        </div>
+        <div class="trip-status-grid">
+            <div>
+                <span>Disponibilidad</span>
+                <strong>{{ active_trip.available_slots }}</strong>
+            </div>
+            <div>
+                <span>Ocupacion</span>
+                <strong>{{ active_trip.occupancy_percent }}%</strong>
+            </div>
+            <div>
+                <span>Fila actual</span>
+                <strong>{{ active_trip.queue }}</strong>
+            </div>
+            <div>
+                <span>Llegada estimada</span>
+                <strong>{{ active_trip.remaining_minutes }} min</strong>
+            </div>
+        </div>
+    </section>
+{% endif %}
+
+<form method="post" class="heading-form">
+    {% csrf_token %}
     <input type="hidden" name="lang" value="{{ lang }}">
     <section class="surface-panel animate-in" data-animate="heading-destination">
         <h2>{{ translations.select_destination }}</h2>
         <div class="destination-grid animate-stagger" data-animate="heading-cards">
             {% for option in parking_options %}
-                <label class="destination-card {% if option.selected %}selected{% endif %}">
-                    <input type="radio" name="parking" value="{{ option.nombre }}" {% if option.selected %}checked{% endif %}>
-                    <strong>{{ option.nombre }}</strong>
-                    <span>{{ option.projected_available }} {{ translations.available }}</span>
-                </label>
+                <article class="destination-card {% if option.selected %}selected{% endif %}">
+                    <label class="destination-main">
+                        <input type="radio" name="parking" value="{{ option.id }}" {% if option.selected %}checked{% endif %} required>
+                        <strong>{{ option.nombre }}</strong>
+                        <span>{{ option.projected_available }} {{ translations.available }}</span>
+                    </label>
+                    <div class="entry-options">
+                        {% for entrada in option.entradas %}
+                            <label class="entry-option">
+                                <input type="radio" name="entrada" value="{{ entrada.id }}" data-parking="{{ option.id }}" required>
+                                <span>{{ entrada.nombre }}</span>
+                                <small>
+                                    {% if entrada.fila > 0 %}
+                                        {{ entrada.fila }} en fila
+                                    {% else %}
+                                        sin fila
+                                    {% endif %}
+                                </small>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </article>
             {% endfor %}
         </div>
     </section>
@@ -39,4 +92,34 @@
 
     <button type="submit" class="trip-button">{{ translations.start_trip }}</button>
 </form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const parkingInputs = document.querySelectorAll('input[name="parking"]');
+    const entryInputs = document.querySelectorAll('input[name="entrada"]');
+
+    const updateSelectedDestination = () => {
+        document.querySelectorAll(".destination-card").forEach((card) => {
+            const input = card.querySelector('input[name="parking"]');
+            card.classList.toggle("selected", Boolean(input && input.checked));
+        });
+    };
+
+    parkingInputs.forEach((input) => {
+        input.addEventListener("change", updateSelectedDestination);
+    });
+
+    entryInputs.forEach((input) => {
+        input.addEventListener("change", () => {
+            const parkingInput = document.querySelector(`input[name="parking"][value="${input.dataset.parking}"]`);
+            if (parkingInput) {
+                parkingInput.checked = true;
+            }
+            updateSelectedDestination();
+        });
+    });
+
+    updateSelectedDestination();
+</script>
 {% endblock %}

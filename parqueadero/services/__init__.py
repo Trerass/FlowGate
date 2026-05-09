@@ -1,3 +1,3 @@
 from .localization import TRANSLATIONS, get_lang, get_translation
-from .parking_service import get_parking_data
+from .parking_service import get_parking_data, process_due_arrivals
 

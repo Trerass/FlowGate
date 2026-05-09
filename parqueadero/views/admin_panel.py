@@ -2,8 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import redirect, render
 
-from parqueadero.models import Entrada, Parqueadero
-from parqueadero.services import TRANSLATIONS, get_lang
+from parqueadero.models import AvisoEnCamino, Entrada, Parqueadero
+from parqueadero.services import TRANSLATIONS, get_lang, process_due_arrivals
 
 
 def _is_staff_user(user):
@@ -14,6 +14,7 @@ def _is_staff_user(user):
 @user_passes_test(_is_staff_user, login_url="home")
 def admin_panel(request):
     lang = get_lang(request)
+    process_due_arrivals()
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -60,5 +61,10 @@ def admin_panel(request):
             "lang": lang,
             "translations": TRANSLATIONS[lang],
             "parqueaderos": parqueaderos,
+            "avisos_en_camino": AvisoEnCamino.objects.select_related(
+                "usuario__user",
+                "parqueadero",
+                "entrada",
+            )[:8],
         },
     )

@@ -1,8 +1,10 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
+from datetime import timedelta
 
-from parqueadero.models import Entrada, Parqueadero, PerfilUsuario, Vehiculo
+from parqueadero.models import AvisoEnCamino, Entrada, Parqueadero, PerfilUsuario, Vehiculo
 
 
 class PublicViewsTests(TestCase):
@@ -18,7 +20,7 @@ class PublicViewsTests(TestCase):
     def test_payments_responde_correctamente(self):
         response = self.client.get(reverse("payments"), {"amount": 5000})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Tarifas de Parqueadero")
+        self.assertContains(response, "Tarifas de parqueadero")
         self.assertContains(response, "Personal - Automovil")
         self.assertNotContains(response, "Monto a recargar")
         self.assertNotContains(response, "Historial")
@@ -70,14 +72,14 @@ class AuthenticatedViewsTests(TestCase):
         PerfilUsuario.objects.filter(user=self.user).update(tipo_usuario="profesor")
         self.client.login(username="maria", password="123456")
         response = self.client.get(reverse("profile"))
-        self.assertContains(response, "Codigo de Profesor")
-        self.assertNotContains(response, "Codigo Estudiantil:")
+        self.assertContains(response, "Codigo de profesor")
+        self.assertNotContains(response, "Codigo estudiantil:")
 
     def test_profile_trabajador_muestra_codigo_de_trabajador(self):
         PerfilUsuario.objects.filter(user=self.user).update(tipo_usuario="trabajador")
         self.client.login(username="maria", password="123456")
         response = self.client.get(reverse("profile"))
-        self.assertContains(response, "Codigo de Trabajador")
+        self.assertContains(response, "Codigo de trabajador")
         self.assertContains(response, "Trabajador")
 
     def test_profile_admin_no_muestra_codigo_ni_tipo_usuario(self):
@@ -86,7 +88,7 @@ class AuthenticatedViewsTests(TestCase):
         response = self.client.get(reverse("profile"))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Codigo")
-        self.assertNotContains(response, "Tipo de Usuario")
+        self.assertNotContains(response, "Tipo de usuario")
         self.assertTrue(PerfilUsuario.objects.filter(user=admin).exists())
 
     def test_heading_autenticado_responde_correctamente(self):
@@ -94,6 +96,100 @@ class AuthenticatedViewsTests(TestCase):
         response = self.client.get(reverse("heading"), {"eta": 20})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "parqueadero/heading.html")
+
+    def test_heading_muestra_parqueaderos_y_entradas_para_seleccionar(self):
+        parqueadero = Parqueadero.objects.create(nombre="Visitantes", capacidad=40)
+        entrada = Entrada.objects.create(nombre="Principal (Visitantes)", parqueadero=parqueadero, fila=2)
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("heading"))
+        self.assertContains(response, 'name="parking"')
+        self.assertContains(response, f'value="{parqueadero.id}"')
+        self.assertContains(response, 'name="entrada"')
+        self.assertContains(response, f'value="{entrada.id}"')
+        self.assertContains(response, "Principal")
+
+    def test_heading_crea_aviso_en_camino(self):
+        parqueadero = Parqueadero.objects.create(nombre="Visitantes", capacidad=40)
+        entrada = Entrada.objects.create(nombre="Principal (Visitantes)", parqueadero=parqueadero, fila=2)
+        self.client.login(username="maria", password="123456")
+        response = self.client.post(
+            reverse("heading"),
+            {
+                "parking": str(parqueadero.id),
+                "entrada": str(entrada.id),
+                "eta": "10",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        aviso = AvisoEnCamino.objects.get(entrada=entrada)
+        self.assertEqual(aviso.eta_minutos, 10)
+        self.assertFalse(aviso.agregado_a_fila)
+        response = self.client.get(reverse("heading"))
+        self.assertContains(response, "Viaje inicializado")
+        self.assertContains(response, "Visitantes")
+        self.assertContains(response, "Entrada Principal")
+        self.assertContains(response, "Cancelar viaje")
+
+    def test_heading_cancela_viaje_activo(self):
+        parqueadero = Parqueadero.objects.create(nombre="Visitantes", capacidad=40)
+        entrada = Entrada.objects.create(nombre="Principal (Visitantes)", parqueadero=parqueadero, fila=2)
+        perfil = PerfilUsuario.objects.get(user=self.user)
+        aviso = AvisoEnCamino.objects.create(
+            usuario=perfil,
+            parqueadero=parqueadero,
+            entrada=entrada,
+            eta_minutos=10,
+            llegada_estimada=timezone.now() + timedelta(minutes=10),
+        )
+
+        self.client.login(username="maria", password="123456")
+        response = self.client.post(reverse("heading"), {"action": "cancel_trip"})
+        self.assertEqual(response.status_code, 302)
+        aviso.refresh_from_db()
+        self.assertTrue(aviso.cancelado)
+        response = self.client.get(reverse("heading"))
+        self.assertNotContains(response, "Viaje inicializado")
+
+    def test_aviso_cancelado_no_se_agrega_a_la_fila(self):
+        parqueadero = Parqueadero.objects.create(nombre="Visitantes", capacidad=40)
+        entrada = Entrada.objects.create(nombre="Principal (Visitantes)", parqueadero=parqueadero, fila=2)
+        perfil = PerfilUsuario.objects.get(user=self.user)
+        aviso = AvisoEnCamino.objects.create(
+            usuario=perfil,
+            parqueadero=parqueadero,
+            entrada=entrada,
+            eta_minutos=10,
+            llegada_estimada=timezone.now() - timedelta(minutes=1),
+            cancelado=True,
+        )
+
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("home"))
+        self.assertEqual(response.status_code, 200)
+        entrada.refresh_from_db()
+        aviso.refresh_from_db()
+        self.assertEqual(entrada.fila, 2)
+        self.assertFalse(aviso.agregado_a_fila)
+
+    def test_aviso_vencido_se_agrega_a_la_fila(self):
+        parqueadero = Parqueadero.objects.create(nombre="Visitantes", capacidad=40)
+        entrada = Entrada.objects.create(nombre="Principal (Visitantes)", parqueadero=parqueadero, fila=2)
+        perfil = PerfilUsuario.objects.get(user=self.user)
+        AvisoEnCamino.objects.create(
+            usuario=perfil,
+            parqueadero=parqueadero,
+            entrada=entrada,
+            eta_minutos=10,
+            llegada_estimada=timezone.now() - timedelta(minutes=1),
+        )
+
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("home"))
+        self.assertEqual(response.status_code, 200)
+        entrada.refresh_from_db()
+        aviso = AvisoEnCamino.objects.get(entrada=entrada)
+        self.assertEqual(entrada.fila, 3)
+        self.assertTrue(aviso.agregado_a_fila)
 
     def test_payments_autenticado_muestra_funciones_de_pago(self):
         self.client.login(username="maria", password="123456")
@@ -240,6 +336,21 @@ class AdminPanelTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Fila Principal")
         self.assertContains(response, f'name="fila_{self.entrada.id}"')
+
+    def test_admin_panel_muestra_avisos_en_camino(self):
+        perfil = PerfilUsuario.objects.create(user=self.staff)
+        AvisoEnCamino.objects.create(
+            usuario=perfil,
+            parqueadero=self.parqueadero,
+            entrada=self.entrada,
+            eta_minutos=15,
+            llegada_estimada=timezone.now() + timedelta(minutes=15),
+        )
+        self.client.login(username="staff", password="123456")
+        response = self.client.get(reverse("admin_panel"))
+        self.assertContains(response, "Avisos en camino")
+        self.assertContains(response, "staff")
+        self.assertContains(response, "Pendiente")
 
     def test_admin_ve_parqueadero_de_profesores(self):
         self.client.login(username="staff", password="123456")

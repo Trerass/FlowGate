@@ -1,7 +1,9 @@
 import random
 from datetime import datetime
 
-from parqueadero.models import Entrada, Parqueadero
+from django.utils import timezone
+
+from parqueadero.models import AvisoEnCamino, Entrada, Parqueadero
 
 from .localization import get_translation
 
@@ -21,6 +23,20 @@ def _can_view_parking(parqueadero, user):
 
 def _entrance_display_name(name):
     return name.split("(", 1)[0].strip()
+
+
+def process_due_arrivals():
+    due_notices = AvisoEnCamino.objects.select_related("entrada").filter(
+        agregado_a_fila=False,
+        cancelado=False,
+        llegada_estimada__lte=timezone.now(),
+    )
+
+    for notice in due_notices:
+        notice.entrada.fila = max(0, notice.entrada.fila) + 1
+        notice.entrada.save(update_fields=["fila"])
+        notice.agregado_a_fila = True
+        notice.save(update_fields=["agregado_a_fila"])
 
 
 def _build_weather(lang):
@@ -103,6 +119,7 @@ def _calculate_wait_time(queue_size, available_slots, occupancy_percent):
 
 
 def get_parking_data(lang, user=None):
+    process_due_arrivals()
     parqueaderos = Parqueadero.objects.all().order_by("nombre")
     parqueadero_data = []
     total_fila = 0
@@ -129,6 +146,7 @@ def get_parking_data(lang, user=None):
             tiempo_espera = _calculate_wait_time(fila, sector_availability, occupancy_percent)
             entrada_data.append(
                 {
+                    "id": entrada.id,
                     "nombre": _entrance_display_name(entrada.nombre),
                     "fila": fila,
                     "tiempo_espera": tiempo_espera,
@@ -139,6 +157,7 @@ def get_parking_data(lang, user=None):
 
         parqueadero_data.append(
             {
+                "id": parqueadero.id,
                 "nombre": parqueadero.nombre,
                 "capacidad": parqueadero.capacidad,
                 "ocupancia": ocupancia,
