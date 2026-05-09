@@ -1,8 +1,10 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 from parqueadero.services import TRANSLATIONS, get_lang, get_parking_data
 
 
+@login_required(login_url="login_view")
 def heading(request):
     lang = get_lang(request)
     dashboard_data = get_parking_data(lang)

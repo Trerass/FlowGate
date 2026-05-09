@@ -18,12 +18,18 @@ class PublicViewsTests(TestCase):
     def test_payments_responde_correctamente(self):
         response = self.client.get(reverse("payments"), {"amount": 5000})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "5000")
+        self.assertContains(response, "Tarifas de Parqueadero")
+        self.assertNotContains(response, "Monto a recargar")
+        self.assertNotContains(response, "Historial")
 
-    def test_heading_responde_correctamente(self):
+    def test_heading_requiere_autenticacion(self):
         response = self.client.get(reverse("heading"), {"eta": 20})
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "parqueadero/heading.html")
+        self.assertEqual(response.status_code, 302)
+
+    def test_menu_publico_oculta_opciones_de_usuario_registrado(self):
+        response = self.client.get(reverse("home"))
+        self.assertNotContains(response, "En Camino")
+        self.assertNotContains(response, "Perfil")
 
 
 class AuthenticatedViewsTests(TestCase):
@@ -40,6 +46,20 @@ class AuthenticatedViewsTests(TestCase):
         response = self.client.get(reverse("profile"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "parqueadero/profile.html")
+
+    def test_heading_autenticado_responde_correctamente(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("heading"), {"eta": 20})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "parqueadero/heading.html")
+
+    def test_payments_autenticado_muestra_funciones_de_pago(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("payments"), {"amount": 5000})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Monto a recargar")
+        self.assertContains(response, "5000")
+        self.assertContains(response, "Historial")
 
     def test_profile_actualiza_datos_personales(self):
         self.client.login(username="maria", password="123456")

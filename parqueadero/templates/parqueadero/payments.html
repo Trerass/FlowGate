@@ -9,30 +9,32 @@
 
 {% block content %}
 <section class="payments-header animate-in" data-animate="payments-header">
-    <h1>{{ translations.payments }} y Saldo</h1>
-    <p>{{ translations.manage_balance }}</p>
+    <h1>{{ translations.payments }}{% if user.is_authenticated %} y Saldo{% endif %}</h1>
+    <p>{% if user.is_authenticated %}{{ translations.manage_balance }}{% else %}Consulta las tarifas disponibles del parqueadero.{% endif %}</p>
 </section>
 
-<section class="balance-card animate-in" data-animate="payments-balance">
-    <div class="balance-main">
-        <span>{{ translations.balance }}</span>
-        <strong>$<span class="count-up" data-count="{{ projected_balance }}">0</span></strong>
-    </div>
-    <form method="get" class="recharge-form">
-        <input type="number" id="amount" name="amount" min="0" placeholder="Monto a recargar" {% if amount %}value="{{ amount }}"{% endif %}>
-        <button type="submit" class="recharge-button">{{ translations.recharge }}</button>
-    </form>
-    <div class="balance-note">
-        <span>Informacion</span>
-        <p>{{ translations.simulated_balance }}</p>
-    </div>
-</section>
+{% if user.is_authenticated %}
+    <section class="balance-card animate-in" data-animate="payments-balance">
+        <div class="balance-main">
+            <span>{{ translations.balance }}</span>
+            <strong>$<span class="count-up" data-count="{{ projected_balance }}">0</span></strong>
+        </div>
+        <form method="get" class="recharge-form">
+            <input type="number" id="amount" name="amount" min="0" placeholder="Monto a recargar" {% if amount %}value="{{ amount }}"{% endif %}>
+            <button type="submit" class="recharge-button">{{ translations.recharge }}</button>
+        </form>
+        <div class="balance-note">
+            <span>Informacion</span>
+            <p>{{ translations.simulated_balance }}</p>
+        </div>
+    </section>
 
-<section class="payments-tabs animate-in" data-animate="payments-tabs">
-    <div class="tab-item active">{{ translations.rates }}</div>
-    <div class="tab-item">{{ translations.recharge }}</div>
-    <div class="tab-item">{{ translations.payment_history }}</div>
-</section>
+    <section class="payments-tabs animate-in" data-animate="payments-tabs">
+        <div class="tab-item active">{{ translations.rates }}</div>
+        <div class="tab-item">{{ translations.recharge }}</div>
+        <div class="tab-item">{{ translations.payment_history }}</div>
+    </section>
+{% endif %}
 
 <section class="surface-panel animate-in" data-animate="payments-rates">
     <h2>Tarifas de Parqueadero</h2>
@@ -52,13 +54,15 @@
     </div>
 </section>
 
-<section class="info-banner animate-in" data-animate="payments-info">
-    <h3>{{ translations.important_info }}</h3>
-    <ul>
-        <li>El cobro se realiza automaticamente al salir del parqueadero.</li>
-        <li>La primera hora o fraccion se cobra completa.</li>
-        <li>El sistema calcula el tiempo exacto de permanencia.</li>
-        <li>Asegurate de tener saldo suficiente antes de ingresar.</li>
-    </ul>
-</section>
+{% if user.is_authenticated %}
+    <section class="info-banner animate-in" data-animate="payments-info">
+        <h3>{{ translations.important_info }}</h3>
+        <ul>
+            <li>El cobro se realiza automaticamente al salir del parqueadero.</li>
+            <li>La primera hora o fraccion se cobra completa.</li>
+            <li>El sistema calcula el tiempo exacto de permanencia.</li>
+            <li>Asegurate de tener saldo suficiente antes de ingresar.</li>
+        </ul>
+    </section>
+{% endif %}
 {% endblock %}
