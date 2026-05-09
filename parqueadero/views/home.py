@@ -5,7 +5,7 @@ from parqueadero.services import TRANSLATIONS, get_lang, get_parking_data
 
 def home(request):
     lang = get_lang(request)
-    dashboard_data = get_parking_data(lang)
+    dashboard_data = get_parking_data(lang, request.user)
     context = {
         **dashboard_data,
         "lang": lang,

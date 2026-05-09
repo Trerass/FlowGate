@@ -40,6 +40,16 @@ class PublicViewsTests(TestCase):
         self.assertContains(response, 'data-count="80"')
         self.assertContains(response, "/80")
 
+    def test_home_usa_fila_guardada_en_base_de_datos(self):
+        Entrada.objects.filter(nombre="Norte").update(fila=9)
+        response = self.client.get(reverse("home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-count="9"')
+
+    def test_home_publico_oculta_parqueadero_de_profesores(self):
+        response = self.client.get(reverse("home"))
+        self.assertNotContains(response, "Profesores")
+
 
 class AuthenticatedViewsTests(TestCase):
     def setUp(self):
@@ -133,6 +143,33 @@ class AuthenticatedViewsTests(TestCase):
         self.assertEqual(perfil.tipo_usuario, "trabajador")
         self.assertEqual(perfil.codigo_estudiantil, "TRB-01")
 
+    def test_home_profesor_ve_parqueadero_de_profesores(self):
+        PerfilUsuario.objects.filter(user=self.user).update(tipo_usuario="profesor")
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, "Profesores")
+        self.assertContains(response, "Regional")
+        self.assertContains(response, "Las Vegas")
+        self.assertNotContains(response, "Regional (Profesores)")
+        self.assertNotContains(response, "Las Vegas (Profesores)")
+
+    def test_heading_profesor_ve_parqueadero_de_profesores(self):
+        PerfilUsuario.objects.filter(user=self.user).update(tipo_usuario="profesor")
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("heading"))
+        self.assertContains(response, "Profesores")
+
+    def test_home_estudiante_no_ve_parqueadero_de_profesores(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("home"))
+        self.assertNotContains(response, "Profesores")
+
+    def test_home_trabajador_no_ve_parqueadero_de_profesores(self):
+        PerfilUsuario.objects.filter(user=self.user).update(tipo_usuario="trabajador")
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("home"))
+        self.assertNotContains(response, "Profesores")
+
     def test_profile_actualiza_vehiculo(self):
         self.client.login(username="maria", password="123456")
         response = self.client.post(
@@ -161,6 +198,7 @@ class AuthenticatedViewsTests(TestCase):
 class AdminPanelTests(TestCase):
     def setUp(self):
         self.parqueadero = Parqueadero.objects.create(nombre="Norte", capacidad=100, ocupancia=30)
+        self.entrada = Entrada.objects.create(nombre="Principal", parqueadero=self.parqueadero, fila=3)
         self.user = User.objects.create_user(username="usuario", password="123456")
         self.staff = User.objects.create_user(username="staff", password="123456", is_staff=True)
         self.superuser = User.objects.create_superuser(username="super", password="123456")
@@ -195,6 +233,33 @@ class AdminPanelTests(TestCase):
         self.parqueadero.refresh_from_db()
         self.assertEqual(self.parqueadero.capacidad, 120)
         self.assertEqual(self.parqueadero.ocupancia, 45)
+
+    def test_admin_panel_muestra_campos_para_modificar_filas(self):
+        self.client.login(username="staff", password="123456")
+        response = self.client.get(reverse("admin_panel"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Fila Principal")
+        self.assertContains(response, f'name="fila_{self.entrada.id}"')
+
+    def test_admin_ve_parqueadero_de_profesores(self):
+        self.client.login(username="staff", password="123456")
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, "Profesores")
+
+    def test_admin_actualiza_filas_en_base_de_datos(self):
+        self.client.login(username="staff", password="123456")
+        response = self.client.post(
+            reverse("admin_panel"),
+            {
+                "action": "update_availability",
+                f"capacidad_{self.parqueadero.id}": "100",
+                f"ocupancia_{self.parqueadero.id}": "30",
+                f"fila_{self.entrada.id}": "14",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.entrada.refresh_from_db()
+        self.assertEqual(self.entrada.fila, 14)
 
     def test_usuario_normal_no_actualiza_disponibilidad(self):
         self.client.login(username="usuario", password="123456")

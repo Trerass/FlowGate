@@ -7,7 +7,7 @@ from parqueadero.services import TRANSLATIONS, get_lang, get_parking_data
 @login_required(login_url="login_view")
 def heading(request):
     lang = get_lang(request)
-    dashboard_data = get_parking_data(lang)
+    dashboard_data = get_parking_data(lang, request.user)
     eta = int(request.GET.get("eta", 15))
     selected = request.GET.get("parking")
 

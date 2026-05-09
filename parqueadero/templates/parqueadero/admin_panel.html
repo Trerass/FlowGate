@@ -42,6 +42,16 @@
                             <input type="number" id="ocupancia_{{ parqueadero.id }}" name="ocupancia_{{ parqueadero.id }}" min="0" max="{{ parqueadero.capacidad }}" value="{{ parqueadero.ocupancia }}">
                         </div>
                     </div>
+                    {% if parqueadero.entradas %}
+                        <div class="admin-entry-grid">
+                            {% for entrada in parqueadero.entradas %}
+                                <div class="form-group">
+                                    <label for="fila_{{ entrada.id }}">Fila {{ entrada.nombre }}</label>
+                                    <input type="number" id="fila_{{ entrada.id }}" name="fila_{{ entrada.id }}" min="0" value="{{ entrada.fila }}">
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </article>
             {% endfor %}
         </div>

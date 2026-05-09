@@ -3,9 +3,15 @@ from django.contrib.auth.models import User
 
 
 class Parqueadero(models.Model):
+    TIPO_ACCESO_CHOICES = [
+        ('general', 'General'),
+        ('profesores', 'Solo profesores'),
+    ]
+
     nombre = models.CharField(max_length=100, unique=True)
     capacidad = models.IntegerField()
     ocupancia = models.IntegerField(default=0)
+    tipo_acceso = models.CharField(max_length=20, choices=TIPO_ACCESO_CHOICES, default='general')
 
     def __str__(self):
         return self.nombre

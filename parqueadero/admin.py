@@ -4,7 +4,8 @@ from .models import Parqueadero, Entrada, PerfilUsuario, Vehiculo, Historial
 
 @admin.register(Parqueadero)
 class ParqueaderoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'capacidad', 'ocupancia')
+    list_display = ('nombre', 'capacidad', 'ocupancia', 'tipo_acceso')
+    list_filter = ('tipo_acceso',)
     search_fields = ('nombre',)
 
 @admin.register(Entrada)

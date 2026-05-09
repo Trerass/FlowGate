@@ -6,6 +6,23 @@ from parqueadero.models import Entrada, Parqueadero
 from .localization import get_translation
 
 
+def _can_view_parking(parqueadero, user):
+    if parqueadero.tipo_acceso != "profesores":
+        return True
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_staff:
+        return True
+    try:
+        return user.perfilusuario.tipo_usuario == "profesor"
+    except Exception:
+        return False
+
+
+def _entrance_display_name(name):
+    return name.split("(", 1)[0].strip()
+
+
 def _build_weather(lang):
     weather_options = [
         {
@@ -85,7 +102,7 @@ def _calculate_wait_time(queue_size, available_slots, occupancy_percent):
     return max(2, round(adjusted_minutes))
 
 
-def get_parking_data(lang):
+def get_parking_data(lang, user=None):
     parqueaderos = Parqueadero.objects.all().order_by("nombre")
     parqueadero_data = []
     total_fila = 0
@@ -93,6 +110,9 @@ def get_parking_data(lang):
     total_occupancy = 0
 
     for parqueadero in parqueaderos:
+        if not _can_view_parking(parqueadero, user):
+            continue
+
         ocupancia = min(parqueadero.capacidad, max(0, parqueadero.ocupancia))
         available_slots = max(parqueadero.capacidad - ocupancia, 0)
         occupancy_percent = (
@@ -104,18 +124,12 @@ def get_parking_data(lang):
         entrada_data = []
 
         for index, entrada in enumerate(entradas):
-            queue_limit = 18 if available_slots < 15 else 10
-            fila = random.randint(0, queue_limit)
-            if available_slots > 25:
-                fila = max(0, fila - random.randint(1, 4))
-            elif available_slots < 10:
-                fila += random.randint(2, 6)
-
+            fila = max(0, entrada.fila)
             sector_availability = max(1, available_slots // max(1, len(entradas)))
             tiempo_espera = _calculate_wait_time(fila, sector_availability, occupancy_percent)
             entrada_data.append(
                 {
-                    "nombre": entrada.nombre,
+                    "nombre": _entrance_display_name(entrada.nombre),
                     "fila": fila,
                     "tiempo_espera": tiempo_espera,
                     "highlight": "primary" if index == 0 else "default",

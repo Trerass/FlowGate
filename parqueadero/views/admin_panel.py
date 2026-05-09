@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import redirect, render
 
-from parqueadero.models import Parqueadero
+from parqueadero.models import Entrada, Parqueadero
 from parqueadero.services import TRANSLATIONS, get_lang
 
 
@@ -28,11 +28,17 @@ def admin_panel(request):
                     parqueadero.ocupancia = min(parqueadero.capacidad, max(0, int(ocupancia)))
                     parqueadero.save()
 
+            for entrada in Entrada.objects.all():
+                fila = request.POST.get(f"fila_{entrada.id}", entrada.fila)
+                if str(fila).isdigit():
+                    entrada.fila = max(0, int(fila))
+                    entrada.save()
+
             messages.success(request, "Disponibilidad actualizada correctamente.")
             return redirect(f"{request.path}?lang={lang}")
 
     parqueaderos = []
-    for parqueadero in Parqueadero.objects.all().order_by("nombre"):
+    for parqueadero in Parqueadero.objects.prefetch_related("entrada_set").all().order_by("nombre"):
         disponibles = max(parqueadero.capacidad - parqueadero.ocupancia, 0)
         porcentaje = round((parqueadero.ocupancia / parqueadero.capacidad) * 100) if parqueadero.capacidad else 0
         parqueaderos.append(
@@ -43,6 +49,7 @@ def admin_panel(request):
                 "ocupancia": parqueadero.ocupancia,
                 "disponibles": disponibles,
                 "porcentaje": porcentaje,
+                "entradas": parqueadero.entrada_set.all().order_by("nombre"),
             }
         )
 
