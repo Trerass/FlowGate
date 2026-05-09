@@ -50,7 +50,7 @@
             <input type="tel" id="phone" name="phone">
         </div>
         <div class="form-group">
-            <label for="codigo">{{ translations.student_code }}</label>
+            <label for="codigo" id="signup-code-label">{{ translations.student_code }}</label>
             <input type="text" id="codigo" name="codigo">
         </div>
         <div class="form-group">
@@ -58,6 +58,7 @@
             <select id="tipo_usuario" name="tipo_usuario">
                 <option value="estudiante">Estudiante</option>
                 <option value="profesor">Profesor</option>
+                <option value="trabajador">Trabajador</option>
             </select>
         </div>
         <button type="submit">{{ translations.signup }}</button>
@@ -76,6 +77,24 @@
             document.getElementById("signup-form").classList.add("active");
             document.querySelectorAll(".auth-tab")[1].classList.add("active");
         }
+    }
+
+    const signupUserType = document.getElementById("tipo_usuario");
+    const signupCodeLabel = document.getElementById("signup-code-label");
+
+    if (signupUserType && signupCodeLabel) {
+        const updateSignupCodeLabel = () => {
+            const labels = {
+                estudiante: "{{ translations.student_code }}",
+                profesor: "{{ translations.teacher_code }}",
+                trabajador: "{{ translations.worker_code }}",
+            };
+
+            signupCodeLabel.textContent = labels[signupUserType.value] || labels.estudiante;
+        };
+
+        signupUserType.addEventListener("change", updateSignupCodeLabel);
+        updateSignupCodeLabel();
     }
 </script>
 {% endblock %}

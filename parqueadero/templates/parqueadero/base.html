@@ -28,6 +28,9 @@
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'heading' %}?lang={{ lang }}" class="nav-link">{{ translations.on_the_way }}</a></li>
                     <li><a href="{% url 'profile' %}?lang={{ lang }}" class="nav-link">{{ translations.profile }}</a></li>
+                    {% if user.is_staff %}
+                        <li><a href="{% url 'admin_panel' %}?lang={{ lang }}" class="nav-link">Admin</a></li>
+                    {% endif %}
                 {% endif %}
             </ul>
 

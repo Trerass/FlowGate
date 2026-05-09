@@ -24,6 +24,12 @@ def payments(request):
                     "tone": "primary",
                 },
                 {
+                    "title": "Personal - Automovil",
+                    "description": "Tarifa diaria para profesores, trabajadores y administradores",
+                    "value": "$8700 / dia",
+                    "tone": "primary",
+                },
+                {
                     "title": "Estudiante - Motocicleta",
                     "description": "Tarifa diaria para estudiantes con motocicleta",
                     "value": "$5000 / dia",

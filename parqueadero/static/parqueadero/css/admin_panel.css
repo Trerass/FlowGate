@@ -1,0 +1,105 @@
+.admin-hero {
+    background: linear-gradient(120deg, #182a4f, var(--primary));
+    border-radius: 30px;
+    box-shadow: var(--shadow);
+    color: #fff;
+    margin-bottom: 28px;
+    padding: 34px 36px;
+}
+
+.admin-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.admin-hero p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.admin-section {
+    margin-bottom: 26px;
+    padding: 30px;
+}
+
+.admin-form {
+    display: grid;
+    gap: 22px;
+}
+
+.admin-grid {
+    display: grid;
+    gap: 18px;
+}
+
+.admin-parking-card {
+    background: #fbfdff;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    display: grid;
+    gap: 18px;
+    padding: 22px;
+}
+
+.admin-card-top {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.admin-card-top h3 {
+    font-size: 1.35rem;
+}
+
+.admin-card-top span {
+    color: var(--primary);
+    font-weight: 800;
+}
+
+.admin-form-grid,
+.admin-create-grid {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-create-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metric-bar {
+    background: #eef4ff;
+    border-radius: 999px;
+    height: 12px;
+    overflow: hidden;
+}
+
+.metric-fill {
+    border-radius: inherit;
+    height: 100%;
+}
+
+.metric-fill.positive {
+    background: var(--success);
+}
+
+.metric-fill.warning {
+    background: var(--warning);
+}
+
+.metric-fill.critical {
+    background: var(--danger);
+}
+
+@media (max-width: 900px) {
+    .admin-card-top {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .admin-create-grid,
+    .admin-form-grid {
+        grid-template-columns: 1fr;
+    }
+}

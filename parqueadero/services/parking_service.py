@@ -45,6 +45,11 @@ def _build_weather(lang):
 
 
 def _occupancy_label(occupancy_percent, lang):
+    if occupancy_percent >= 100:
+        return {
+            "text": get_translation(lang, "full"),
+            "tone": "critical",
+        }
     if occupancy_percent >= 90:
         return {
             "text": get_translation(lang, "almost_full"),
@@ -88,8 +93,7 @@ def get_parking_data(lang):
     total_occupancy = 0
 
     for parqueadero in parqueaderos:
-        base_occupancy = int(parqueadero.capacidad * random.uniform(0.58, 0.93))
-        ocupancia = min(parqueadero.capacidad, max(0, base_occupancy))
+        ocupancia = min(parqueadero.capacidad, max(0, parqueadero.ocupancia))
         available_slots = max(parqueadero.capacidad - ocupancia, 0)
         occupancy_percent = (
             (ocupancia / parqueadero.capacidad) * 100 if parqueadero.capacidad else 0

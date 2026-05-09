@@ -11,8 +11,6 @@ def _update_profile(user, perfil, request):
     full_name = request.POST.get("full_name", "").strip()
     email = request.POST.get("email", "").strip()
     telefono = request.POST.get("telefono", "").strip()
-    codigo = request.POST.get("codigo_estudiantil", "").strip()
-    tipo_usuario = request.POST.get("tipo_usuario", "estudiante")
 
     name_parts = full_name.split(" ", 1)
     user.first_name = name_parts[0] if name_parts else ""
@@ -21,8 +19,11 @@ def _update_profile(user, perfil, request):
     user.save()
 
     perfil.telefono = telefono
-    perfil.codigo_estudiantil = codigo
-    perfil.tipo_usuario = tipo_usuario
+    if not user.is_staff:
+        codigo = request.POST.get("codigo_estudiantil", "").strip()
+        tipo_usuario = request.POST.get("tipo_usuario", "estudiante")
+        perfil.codigo_estudiantil = codigo
+        perfil.tipo_usuario = tipo_usuario
     perfil.save()
 
 
@@ -80,6 +81,11 @@ def profile(request):
 
     historial = Historial.objects.filter(usuario=perfil)[:8]
     full_name = f"{user.first_name} {user.last_name}".strip() or user.username
+    code_labels = {
+        "profesor": TRANSLATIONS[lang]["teacher_code"],
+        "trabajador": TRANSLATIONS[lang]["worker_code"],
+    }
+    code_label = code_labels.get(perfil.tipo_usuario, TRANSLATIONS[lang]["student_code"])
 
     return render(
         request,
@@ -89,6 +95,7 @@ def profile(request):
             "vehiculo": vehiculo,
             "historial": historial,
             "full_name": full_name,
+            "code_label": code_label,
             "active_tab": active_tab,
             "lang": lang,
             "translations": TRANSLATIONS[lang],

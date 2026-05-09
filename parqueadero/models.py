@@ -25,6 +25,7 @@ class PerfilUsuario(models.Model):
     TIPO_USUARIO_CHOICES = [
         ('estudiante', 'Estudiante'),
         ('profesor', 'Profesor'),
+        ('trabajador', 'Trabajador'),
     ]
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)

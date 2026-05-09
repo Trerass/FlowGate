@@ -1,0 +1,51 @@
+{% extends "parqueadero/base.html" %}
+{% load static %}
+
+{% block title %}Admin - FlowGate{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'parqueadero/css/admin_panel.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="admin-hero animate-in" data-animate="admin-hero">
+    <div>
+        <h1>Panel administrativo</h1>
+        <p>Controla la disponibilidad real de cada zona de parqueadero.</p>
+    </div>
+</section>
+
+<section class="surface-card admin-section animate-in" data-animate="admin-availability">
+    <div class="section-row">
+        <h2>Disponibilidad por zona</h2>
+    </div>
+    <form method="post" class="admin-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_availability">
+        <div class="admin-grid">
+            {% for parqueadero in parqueaderos %}
+                <article class="admin-parking-card">
+                    <div class="admin-card-top">
+                        <h3>{{ parqueadero.nombre }}</h3>
+                        <span>{{ parqueadero.disponibles }} disponibles</span>
+                    </div>
+                    <div class="metric-bar">
+                        <div class="metric-fill {% if parqueadero.porcentaje >= 90 %}critical{% elif parqueadero.porcentaje >= 70 %}warning{% else %}positive{% endif %}" style="width: {{ parqueadero.porcentaje }}%"></div>
+                    </div>
+                    <div class="admin-form-grid">
+                        <div class="form-group">
+                            <label for="capacidad_{{ parqueadero.id }}">Capacidad total</label>
+                            <input type="number" id="capacidad_{{ parqueadero.id }}" name="capacidad_{{ parqueadero.id }}" min="0" value="{{ parqueadero.capacidad }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="ocupancia_{{ parqueadero.id }}">Espacios ocupados</label>
+                            <input type="number" id="ocupancia_{{ parqueadero.id }}" name="ocupancia_{{ parqueadero.id }}" min="0" max="{{ parqueadero.capacidad }}" value="{{ parqueadero.ocupancia }}">
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+        <button type="submit" class="primary-action">Guardar disponibilidad</button>
+    </form>
+</section>
+{% endblock %}

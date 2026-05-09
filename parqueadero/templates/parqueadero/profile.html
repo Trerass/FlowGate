@@ -13,7 +13,9 @@
     <div>
         <h1>{{ full_name }}</h1>
         <p>{{ user.email|default:"sin-correo@flowgate.app" }}</p>
-        <span>Codigo: {{ perfil.codigo_estudiantil|default:"N/A" }}</span>
+        {% if not user.is_staff %}
+            <span>{{ code_label }}: {{ perfil.codigo_estudiantil|default:"N/A" }}</span>
+        {% endif %}
     </div>
 </section>
 
@@ -67,17 +69,20 @@
                     <label for="telefono">{{ translations.phone }}</label>
                     <input type="text" id="telefono" name="telefono" value="{{ perfil.telefono }}">
                 </div>
-                <div class="form-group">
-                    <label for="codigo_estudiantil">{{ translations.student_code }}</label>
-                    <input type="text" id="codigo_estudiantil" name="codigo_estudiantil" value="{{ perfil.codigo_estudiantil }}">
-                </div>
-                <div class="form-group">
-                    <label for="tipo_usuario">{{ translations.user_type }}</label>
-                    <select id="tipo_usuario" name="tipo_usuario">
-                        <option value="estudiante" {% if perfil.tipo_usuario == 'estudiante' %}selected{% endif %}>Estudiante</option>
-                        <option value="profesor" {% if perfil.tipo_usuario == 'profesor' %}selected{% endif %}>Profesor</option>
-                    </select>
-                </div>
+                {% if not user.is_staff %}
+                    <div class="form-group">
+                        <label for="codigo_estudiantil" id="profile-code-label">{{ code_label }}</label>
+                        <input type="text" id="codigo_estudiantil" name="codigo_estudiantil" value="{{ perfil.codigo_estudiantil }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="tipo_usuario">{{ translations.user_type }}</label>
+                        <select id="tipo_usuario" name="tipo_usuario">
+                            <option value="estudiante" {% if perfil.tipo_usuario == 'estudiante' %}selected{% endif %}>Estudiante</option>
+                            <option value="profesor" {% if perfil.tipo_usuario == 'profesor' %}selected{% endif %}>Profesor</option>
+                            <option value="trabajador" {% if perfil.tipo_usuario == 'trabajador' %}selected{% endif %}>Trabajador</option>
+                        </select>
+                    </div>
+                {% endif %}
             </div>
             <button type="submit" class="primary-action">{{ translations.save_changes }}</button>
         </form>
@@ -150,5 +155,29 @@
             <button type="submit" class="danger-action" name="action" value="delete_account">{{ translations.delete_account }}</button>
         </form>
     </section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if not user.is_staff %}
+    <script>
+        const profileUserType = document.getElementById("tipo_usuario");
+        const profileCodeLabel = document.getElementById("profile-code-label");
+
+        if (profileUserType && profileCodeLabel) {
+            const updateProfileCodeLabel = () => {
+                const labels = {
+                    estudiante: "{{ translations.student_code }}",
+                    profesor: "{{ translations.teacher_code }}",
+                    trabajador: "{{ translations.worker_code }}",
+                };
+
+                profileCodeLabel.textContent = labels[profileUserType.value] || labels.estudiante;
+            };
+
+            profileUserType.addEventListener("change", updateProfileCodeLabel);
+            updateProfileCodeLabel();
+        }
+    </script>
 {% endif %}
 {% endblock %}
