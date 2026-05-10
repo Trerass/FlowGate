@@ -39,16 +39,31 @@
     position: absolute;
 }
 
+.balance-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
 .balance-main span {
     display: block;
     font-size: 1.1rem;
 }
 
 .balance-main strong {
-    display: block;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
     font-size: 4rem;
     font-weight: 800;
-    margin-top: 6px;
+    margin-top: 0;
+    line-height: 1;
+}
+
+.balance-main strong .count-up {
+    font-size: inherit;
+    display: inline-block;
 }
 
 .recharge-form {

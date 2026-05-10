@@ -99,7 +99,7 @@ def payments(request):
         return redirect(redirect_url)
 
     amount = request.GET.get("amount", "")
-    balance = 125000
+    balance = 0
     recharge_amount = int(amount) if str(amount).isdigit() else 0
     projected_balance = balance + recharge_amount
     active_tab = request.GET.get("tab", "rates")
