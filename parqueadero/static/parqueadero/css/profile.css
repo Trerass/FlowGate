@@ -82,6 +82,7 @@
 .section-row {
     align-items: center;
     display: flex;
+    gap: 14px;
     justify-content: space-between;
     margin-bottom: 22px;
 }
@@ -195,5 +196,108 @@
 
     .form-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 680px) {
+    .profile-hero,
+    .surface-card {
+        border-radius: 24px;
+        padding: 20px;
+    }
+
+    .profile-hero {
+        box-shadow: 0 20px 38px rgba(41, 98, 242, 0.18);
+        gap: 18px;
+        margin-bottom: 16px;
+    }
+
+    .surface-card {
+        margin-bottom: 18px;
+    }
+
+    .profile-form {
+        gap: 18px;
+    }
+
+    .form-grid {
+        gap: 14px;
+    }
+
+    .avatar-shell {
+        font-size: 2.1rem;
+        height: 78px;
+        width: 78px;
+    }
+
+    .profile-hero h1 {
+        font-size: clamp(2rem, 11vw, 2.55rem);
+    }
+
+    .profile-hero p,
+    .profile-hero span {
+        font-size: 1rem;
+    }
+
+    .tab-shell {
+        border-radius: 18px;
+        margin-bottom: 18px;
+    }
+
+    .tab-link {
+        font-size: 1rem;
+        padding: 16px 12px;
+    }
+
+    .section-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .section-row h2 {
+        font-size: 1.55rem;
+    }
+
+    .rate-preview {
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .rate-preview strong {
+        font-size: 1.8rem;
+    }
+
+    .action-row {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .primary-action,
+    .danger-action {
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+    }
+
+    .history-item {
+        border-radius: 18px;
+        padding: 16px;
+    }
+
+    .history-meta {
+        justify-items: start;
+        width: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .profile-hero,
+    .surface-card {
+        padding: 18px;
+    }
+
+    .tab-link {
+        font-size: 0.92rem;
+        padding: 14px 10px;
     }
 }

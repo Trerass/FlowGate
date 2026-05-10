@@ -86,4 +86,41 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     });
+
+    const destinationCards = document.querySelectorAll("[data-destination-card]");
+    if (destinationCards.length) {
+        destinationCards.forEach((card) => {
+            card.addEventListener("click", () => {
+                const input = card.querySelector('input[type="radio"]');
+                if (!input) {
+                    return;
+                }
+                input.checked = true;
+                destinationCards.forEach((item) => item.classList.remove("selected"));
+                card.classList.add("selected");
+            });
+        });
+    }
+
+    const etaControls = document.querySelectorAll("[data-eta-control]");
+    etaControls.forEach((control) => {
+        const range = control.querySelector(".eta-range");
+        const output = control.querySelector("[data-eta-value]");
+        if (!range || !output) {
+            return;
+        }
+
+        const updateEta = () => {
+            const min = Number(range.min || 0);
+            const max = Number(range.max || 100);
+            const value = Number(range.value || min);
+            const percent = ((value - min) / Math.max(1, max - min)) * 100;
+            range.style.setProperty("--eta-progress", `${percent}%`);
+            output.textContent = value.toLocaleString("es-CO");
+        };
+
+        range.addEventListener("input", updateEta);
+        range.addEventListener("change", updateEta);
+        updateEta();
+    });
 });

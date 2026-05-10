@@ -4,7 +4,16 @@ from django.contrib.auth import logout
 from django.shortcuts import redirect, render
 
 from parqueadero.models import Historial, PerfilUsuario, Vehiculo
-from parqueadero.services import TRANSLATIONS, get_lang
+from parqueadero.services import (
+    TRANSLATIONS,
+    get_lang,
+    translate_entrance_name,
+    translate_parking_name,
+)
+
+
+def _format_currency(value):
+    return f"{value:,}".replace(",", ".")
 
 
 def _update_profile(user, perfil, request):
@@ -79,7 +88,14 @@ def profile(request):
 
         return redirect(f"{request.path}?lang={lang}&tab={active_tab}")
 
-    historial = Historial.objects.filter(usuario=perfil)[:8]
+    historial = list(Historial.objects.filter(usuario=perfil)[:8])
+    for registro in historial:
+        registro.display_parqueadero = translate_parking_name(registro.parqueadero.nombre, lang)
+        entrada_nombre = registro.entrada.nombre.split("(", 1)[0].strip() if registro.entrada else ""
+        registro.display_entrada = (
+            translate_entrance_name(entrada_nombre, lang) if registro.entrada else "N/A"
+        )
+        registro.display_costo = _format_currency(registro.costo)
     full_name = f"{user.first_name} {user.last_name}".strip() or user.username
     code_labels = {
         "profesor": TRANSLATIONS[lang]["teacher_code"],

@@ -74,6 +74,37 @@ class Vehiculo(models.Model):
     def __str__(self):
         return f"{self.marca} {self.modelo} ({self.placa})"
 
+
+class MetodoPago(models.Model):
+    usuario = models.ForeignKey(
+        PerfilUsuario,
+        on_delete=models.CASCADE,
+        related_name='metodos_pago',
+    )
+    titular = models.CharField(max_length=100)
+    marca = models.CharField(max_length=40, default='Tarjeta')
+    ultimos_cuatro = models.CharField(max_length=4)
+    mes_expiracion = models.PositiveSmallIntegerField()
+    anio_expiracion = models.PositiveSmallIntegerField()
+    es_activa = models.BooleanField(default=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    @property
+    def numero_enmascarado(self):
+        return f"**** **** **** {self.ultimos_cuatro}"
+
+    @property
+    def vencimiento(self):
+        return f"{self.mes_expiracion:02d}/{str(self.anio_expiracion)[-2:]}"
+
+    def __str__(self):
+        return f"{self.marca} {self.numero_enmascarado} - {self.usuario.user.username}"
+
+    class Meta:
+        ordering = ['-es_activa', '-actualizado_en']
+
+
 class Historial(models.Model):
     usuario = models.ForeignKey(PerfilUsuario, on_delete=models.CASCADE)
     parqueadero = models.ForeignKey(Parqueadero, on_delete=models.CASCADE)

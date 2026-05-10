@@ -6,12 +6,18 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from parqueadero.models import AvisoEnCamino, Entrada, PerfilUsuario
-from parqueadero.services import TRANSLATIONS, get_lang, get_parking_data
+from parqueadero.services import (
+    TRANSLATIONS,
+    get_lang,
+    get_parking_data,
+    translate_entrance_name,
+    translate_parking_name,
+)
 from parqueadero.services.parking_service import _can_view_parking
 
 
-def _clean_entry_name(name):
-    return name.split("(", 1)[0].strip()
+def _clean_entry_name(name, lang):
+    return translate_entrance_name(name.split("(", 1)[0].strip(), lang)
 
 
 @login_required(login_url="login_view")
@@ -33,19 +39,19 @@ def heading(request):
                 agregado_a_fila=False,
                 cancelado=False,
             ).update(cancelado=True)
-            messages.success(request, "Viaje cancelado correctamente.")
+            messages.success(request, TRANSLATIONS[lang]["trip_cancelled"])
             return redirect(f"{request.path}?lang={lang}")
 
         try:
             entrada = Entrada.objects.select_related("parqueadero").get(id=selected_entry)
         except (Entrada.DoesNotExist, ValueError, TypeError):
-            messages.error(request, "Selecciona una entrada valida para avisar que vas en camino.")
+            messages.error(request, TRANSLATIONS[lang]["select_valid_entry"])
         else:
             parking_matches_entry = str(entrada.parqueadero_id) == str(selected_parking)
             if not parking_matches_entry or not _can_view_parking(entrada.parqueadero, request.user):
-                messages.error(request, "Selecciona un parqueadero y una entrada disponibles para tu usuario.")
+                messages.error(request, TRANSLATIONS[lang]["select_available_parking_entry"])
             else:
-                eta = max(0, min(120, eta))
+                eta = max(1, min(60, eta))
                 AvisoEnCamino.objects.filter(
                     usuario=perfil,
                     agregado_a_fila=False,
@@ -59,6 +65,8 @@ def heading(request):
                     llegada_estimada=timezone.now() + timedelta(minutes=eta),
                 )
                 return redirect(f"{request.path}?lang={lang}")
+
+    eta = max(1, min(60, eta))
 
     parking_options = []
     for parqueadero in dashboard_data["parqueaderos"]:
@@ -90,8 +98,9 @@ def heading(request):
         )
         active_trip = {
             "parqueadero": active_notice.parqueadero,
+            "parqueadero_nombre": translate_parking_name(active_notice.parqueadero.nombre, lang),
             "entrada": active_notice.entrada,
-            "entrada_nombre": _clean_entry_name(active_notice.entrada.nombre),
+            "entrada_nombre": _clean_entry_name(active_notice.entrada.nombre, lang),
             "eta_minutos": active_notice.eta_minutos,
             "remaining_minutes": remaining_minutes,
             "available_slots": max(active_notice.parqueadero.capacidad - active_notice.parqueadero.ocupancia, 0),

@@ -93,6 +93,7 @@
 
 .tab-item {
     color: #51607c;
+    display: block;
     font-size: 1.2rem;
     padding: 22px;
     text-align: center;
@@ -108,6 +109,380 @@
 .tab-item:hover {
     background: #fafcff;
     color: var(--primary);
+}
+
+.payment-card-shell {
+    display: grid;
+    justify-items: center;
+    margin-bottom: 30px;
+}
+
+body.payment-modal-open {
+    overflow: hidden;
+}
+
+.page-shell:has(.payment-card-modal) {
+    z-index: 1600;
+}
+
+body.payment-modal-open .navbar {
+    z-index: 900;
+}
+
+.payment-card-modal {
+    align-items: center;
+    inset: 0;
+    justify-items: center;
+    margin: 0;
+    padding: 28px;
+    position: fixed;
+    z-index: 1400;
+}
+
+.payment-modal-backdrop {
+    background: rgba(12, 20, 38, 0.5);
+    border: none;
+    cursor: pointer;
+    inset: 0;
+    position: absolute;
+}
+
+.payment-modal-panel {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(41, 98, 242, 0.1);
+    border-radius: 30px;
+    box-shadow: 0 30px 70px rgba(16, 37, 85, 0.28);
+    max-height: calc(100vh - 56px);
+    max-width: 900px;
+    overflow-y: auto;
+    padding: 22px;
+    position: relative;
+    width: min(100%, 900px);
+    z-index: 1;
+}
+
+.payment-modal-header {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding: 0 4px;
+}
+
+.payment-modal-header span {
+    color: var(--primary);
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.payment-modal-header h2 {
+    font-size: 1.55rem;
+}
+
+.payment-modal-close,
+.payment-card-cancel {
+    background: #eef4ff;
+    border: none;
+    border-radius: 999px;
+    color: var(--primary);
+    cursor: pointer;
+    font-weight: 800;
+    min-height: 40px;
+    padding: 0 16px;
+}
+
+.payment-card-cancel {
+    background: transparent;
+    border: 1px solid rgba(41, 98, 242, 0.18);
+    min-width: min(100%, 360px);
+}
+
+.payment-modal-close:hover,
+.payment-modal-close:focus,
+.payment-card-cancel:hover,
+.payment-card-cancel:focus {
+    background: #e5edff;
+    outline: none;
+}
+
+.payment-card-modal .payment-card-form {
+    max-width: none;
+}
+
+.payment-card-form {
+    display: grid;
+    gap: 20px;
+    max-width: 820px;
+    min-width: 0;
+    width: 100%;
+}
+
+.payment-card-stage {
+    min-height: 420px;
+    perspective: 1400px;
+    width: 100%;
+}
+
+.payment-card-visual {
+    height: 420px;
+    position: relative;
+    transform: rotateY(0deg);
+    transform-style: preserve-3d;
+    width: 100%;
+}
+
+.payment-card-face {
+    backface-visibility: hidden;
+    border-radius: 26px;
+    box-shadow: 0 26px 58px rgba(16, 37, 85, 0.22);
+    color: #fff;
+    inset: 0;
+    overflow: hidden;
+    padding: 28px;
+    position: absolute;
+    width: 100%;
+}
+
+.payment-card-front {
+    background:
+        radial-gradient(circle at 86% 12%, rgba(255, 255, 255, 0.18), transparent 20%),
+        linear-gradient(135deg, #173a83 0%, #2861df 58%, #127f96 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    pointer-events: auto;
+}
+
+.payment-card-back {
+    background:
+        radial-gradient(circle at 14% 90%, rgba(255, 255, 255, 0.16), transparent 26%),
+        linear-gradient(135deg, #10285e 0%, #1e40af 58%, #111827 100%);
+    pointer-events: none;
+    transform: rotateY(180deg);
+}
+
+.payment-card-visual[data-side="back"] .payment-card-front {
+    pointer-events: none;
+}
+
+.payment-card-visual[data-side="back"] .payment-card-back {
+    pointer-events: auto;
+}
+
+.card-ambient {
+    border-radius: 999px;
+    filter: blur(2px);
+    pointer-events: none;
+    position: absolute;
+}
+
+.card-ambient-one {
+    background: rgba(255, 255, 255, 0.1);
+    height: 170px;
+    right: -36px;
+    top: -42px;
+    width: 170px;
+}
+
+.card-ambient-two {
+    background: rgba(255, 255, 255, 0.06);
+    bottom: -96px;
+    height: 230px;
+    left: -78px;
+    width: 230px;
+}
+
+.payment-card-top,
+.payment-card-row,
+.payment-card-actions {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+}
+
+.card-chip {
+    background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+        linear-gradient(180deg, #f8d46f 0%, #e3a642 100%);
+    background-size: 13px 100%, 100% 100%;
+    border-radius: 10px;
+    box-shadow: inset 0 0 0 1px rgba(86, 56, 0, 0.18);
+    height: 40px;
+    width: 54px;
+}
+
+.card-brand {
+    font-size: 1rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.payment-card-amount {
+    display: grid;
+    gap: 4px;
+    justify-items: end;
+    position: absolute;
+    right: 34px;
+    top: 88px;
+    z-index: 1;
+}
+
+.payment-card-amount span,
+.payment-card-field span {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.payment-card-amount strong {
+    font-size: 1.9rem;
+    line-height: 1;
+}
+
+.payment-card-field {
+    display: grid;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.payment-card-field input {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    border-radius: 13px;
+    color: #fff;
+    font-family: "Courier New", Courier, monospace;
+    min-height: 48px;
+    padding: 0 16px;
+    transform: none;
+    min-width: 0;
+}
+
+.payment-card-field input::placeholder {
+    color: rgba(255, 255, 255, 0.56);
+}
+
+.payment-card-visual.has-saved-card .payment-card-field input::placeholder {
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.payment-card-field input:focus {
+    border-color: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14);
+}
+
+.payment-card-number {
+    margin-top: 44px;
+    max-width: 560px;
+}
+
+.payment-card-number input {
+    font-size: 1.22rem;
+}
+
+.payment-card-row {
+    align-items: end;
+    justify-content: flex-start;
+}
+
+.payment-card-row .payment-card-field {
+    max-width: 136px;
+}
+
+.card-flip-button {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    border-radius: 13px;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 900;
+    min-height: 48px;
+    padding: 0 22px;
+    text-transform: uppercase;
+}
+
+.card-flip-button:hover,
+.card-flip-button:focus {
+    background: rgba(255, 255, 255, 0.22);
+    outline: none;
+}
+
+.payment-card-strip {
+    background: #05070f;
+    height: 54px;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 38px;
+}
+
+.payment-card-back-body {
+    align-items: end;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) 130px;
+    margin-top: 116px;
+    position: relative;
+    z-index: 1;
+}
+
+.signature-strip {
+    align-items: center;
+    background:
+        repeating-linear-gradient(135deg, rgba(30, 41, 59, 0.14) 0 8px, rgba(255, 255, 255, 0.72) 8px 16px),
+        #fff;
+    border-radius: 10px;
+    color: #1f2a44;
+    display: flex;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 800;
+    height: 54px;
+    padding: 0 18px;
+}
+
+.cvv-field input {
+    text-align: center;
+}
+
+.payment-card-back .card-secure-note {
+    bottom: 74px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.92rem;
+    left: 30px;
+    line-height: 1.45;
+    max-width: 520px;
+    position: absolute;
+}
+
+.card-flip-button-light {
+    bottom: 28px;
+    position: absolute;
+    right: 30px;
+}
+
+.payment-card-actions {
+    display: grid;
+    gap: 10px;
+    justify-content: center;
+    justify-items: center;
+}
+
+.payment-card-submit {
+    box-shadow: 0 14px 28px rgba(41, 98, 242, 0.16);
+    min-width: min(100%, 360px);
+}
+
+.payment-card-actions p {
+    color: var(--primary);
+    font-weight: 800;
+    text-align: center;
 }
 
 .surface-panel {
@@ -197,13 +572,316 @@
     padding-left: 20px;
 }
 
+.payment-history-panel .empty-state {
+    color: var(--muted);
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.payment-history-panel .empty-state-icon {
+    color: var(--primary);
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
 @media (max-width: 960px) {
-    .recharge-form,
-    .payments-tabs {
+    .recharge-form {
         grid-template-columns: 1fr;
     }
 
     .balance-main strong {
         font-size: 3rem;
+    }
+
+    .payment-card-stage,
+    .payment-card-visual {
+        height: 500px;
+    }
+
+    .payment-card-face {
+        padding: 22px;
+    }
+
+    .payment-card-amount {
+        position: relative;
+        right: auto;
+        top: auto;
+        justify-items: start;
+    }
+
+    .payment-card-number {
+        margin-top: 10px;
+    }
+
+    .payment-card-row,
+    .payment-card-back-body {
+        align-items: stretch;
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .payment-card-row .payment-card-field {
+        max-width: none;
+    }
+
+    .payment-card-back .card-secure-note {
+        bottom: 98px;
+        left: 22px;
+        right: 22px;
+    }
+
+    .card-flip-button-light {
+        bottom: 24px;
+        left: 22px;
+        right: 22px;
+        width: calc(100% - 44px);
+    }
+}
+
+@media (max-width: 680px) {
+    .payments-header {
+        background:
+            radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.32), transparent 32%),
+            linear-gradient(135deg, #1e3a8a 0%, #2962f2 58%, #15949e 100%);
+        border-radius: 28px;
+        box-shadow: 0 20px 38px rgba(41, 98, 242, 0.18);
+        color: #fff;
+        margin-bottom: 16px;
+        padding: 24px;
+    }
+
+    .payments-header h1 {
+        font-size: clamp(2.1rem, 12vw, 2.7rem);
+        line-height: 1.05;
+    }
+
+    .payments-header p {
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.98rem;
+    }
+
+    .balance-card,
+    .surface-panel,
+    .info-banner {
+        border-radius: 24px;
+        padding: 20px;
+    }
+
+    .balance-card {
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .balance-main strong {
+        font-size: 2.7rem;
+    }
+
+    .balance-note {
+        border-radius: 16px;
+        padding: 16px;
+    }
+
+    .recharge-form {
+        align-items: stretch;
+        grid-template-columns: 1fr;
+    }
+
+    .payments-tabs {
+        border-radius: 18px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 18px;
+    }
+
+    .tab-item {
+        font-size: 0.9rem;
+        padding: 14px 8px;
+    }
+
+    .payment-card-form {
+        gap: 16px;
+    }
+
+    .payment-card-modal {
+        align-items: start;
+        padding: 10px;
+    }
+
+    .payment-modal-panel {
+        border-radius: 24px;
+        max-height: calc(100dvh - 20px);
+        padding: 14px;
+    }
+
+    .payment-modal-header {
+        background: rgba(255, 255, 255, 0.96);
+        border-radius: 18px;
+        margin-bottom: 12px;
+        padding: 6px;
+        position: sticky;
+        top: 0;
+        z-index: 4;
+    }
+
+    .payment-modal-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .payment-modal-close {
+        min-height: 36px;
+        padding: 0 12px;
+    }
+
+    .payment-card-cancel {
+        min-height: 46px;
+        width: 100%;
+    }
+
+    .payment-card-stage,
+    .payment-card-visual {
+        height: 470px;
+    }
+
+    .payment-card-face {
+        border-radius: 22px;
+        padding: 20px;
+    }
+
+    .payment-card-front {
+        gap: 12px;
+    }
+
+    .card-chip {
+        border-radius: 9px;
+        height: 34px;
+        width: 46px;
+    }
+
+    .card-brand {
+        font-size: 0.86rem;
+    }
+
+    .payment-card-amount {
+        margin-top: 4px;
+    }
+
+    .payment-card-amount strong {
+        font-size: 1.6rem;
+    }
+
+    .payment-card-field {
+        gap: 6px;
+    }
+
+    .payment-card-field input {
+        border-radius: 12px;
+        min-height: 46px;
+        padding: 0 14px;
+    }
+
+    .payment-card-number input {
+        font-size: clamp(0.98rem, 4.6vw, 1.12rem);
+    }
+
+    .card-flip-button {
+        min-height: 46px;
+        padding: 0 18px;
+        width: 100%;
+    }
+
+    .payment-card-back-body {
+        gap: 12px;
+        margin-top: 106px;
+    }
+
+    .payment-card-back .card-secure-note {
+        bottom: 84px;
+        font-size: 0.86rem;
+        left: 20px;
+        right: 20px;
+    }
+
+    .card-flip-button-light {
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        width: calc(100% - 40px);
+    }
+
+    .rate-card {
+        border-radius: 18px;
+        padding: 20px;
+    }
+
+    .rate-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .rate-header h3 {
+        font-size: 1.35rem;
+    }
+
+    .rate-value {
+        font-size: 1.65rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .balance-card,
+    .surface-panel,
+    .info-banner {
+        padding: 18px;
+    }
+
+    .payment-card-stage,
+    .payment-card-visual {
+        height: 455px;
+    }
+
+    .payment-card-face {
+        border-radius: 20px;
+        padding: 16px;
+    }
+
+    .payment-card-top {
+        gap: 12px;
+    }
+
+    .card-brand {
+        font-size: 0.78rem;
+    }
+
+    .payment-card-field span,
+    .payment-card-amount span {
+        font-size: 0.7rem;
+    }
+
+    .payment-card-field input {
+        font-size: 0.92rem;
+        min-height: 44px;
+        padding: 0 12px;
+    }
+
+    .payment-card-number input {
+        font-size: clamp(0.86rem, 4.4vw, 1rem);
+    }
+
+    .signature-strip {
+        height: 48px;
+    }
+
+    .payment-card-strip {
+        height: 48px;
+        top: 30px;
+    }
+
+    .payment-card-back-body {
+        margin-top: 96px;
+    }
+
+    .payment-card-back .card-secure-note {
+        bottom: 78px;
     }
 }

@@ -141,3 +141,42 @@
         grid-template-columns: 1fr;
     }
 }
+
+@media (max-width: 680px) {
+    .admin-hero,
+    .admin-section {
+        border-radius: 24px;
+        padding: 20px;
+    }
+
+    .admin-hero {
+        box-shadow: 0 20px 38px rgba(24, 42, 79, 0.18);
+        margin-bottom: 16px;
+    }
+
+    .admin-hero h1 {
+        font-size: clamp(2.1rem, 12vw, 2.7rem);
+    }
+
+    .admin-parking-card,
+    .notice-item {
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .admin-card-top h3 {
+        font-size: 1.18rem;
+    }
+
+    .notice-meta {
+        justify-items: start;
+        width: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .admin-hero,
+    .admin-section {
+        padding: 18px;
+    }
+}

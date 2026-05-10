@@ -20,28 +20,28 @@
                 <article class="history-card">
                     <div class="history-card-top">
                         <div>
-                            <h2>{{ registro.parqueadero.nombre }}</h2>
+                            <h2>{{ registro.display_parqueadero }}</h2>
                             <p>{{ registro.fecha|date:"d/m/Y" }}</p>
                         </div>
                         <span class="history-cost">
                             {% if registro.costo == 0 %}
                                 {{ translations.free }}
                             {% else %}
-                                ${{ registro.costo|stringformat:",.0f" }}
+                                ${{ registro.display_costo }}
                             {% endif %}
                         </span>
                     </div>
                     <div class="history-meta-grid">
                         <div>
                             <span class="mini-label">{{ translations.entrance }}</span>
-                            <strong>{{ registro.entrada.nombre|default:"N/A" }}</strong>
+                            <strong>{{ registro.display_entrada }}</strong>
                         </div>
                         <div>
-                            <span class="mini-label">Entrada</span>
+                            <span class="mini-label">{{ translations.history_entry_time }}</span>
                             <strong>{{ registro.hora_entrada|time:"H:i" }}</strong>
                         </div>
                         <div>
-                            <span class="mini-label">Salida</span>
+                            <span class="mini-label">{{ translations.history_exit_time }}</span>
                             <strong>
                                 {% if registro.hora_salida %}
                                     {{ registro.hora_salida|time:"H:i" }}
@@ -56,8 +56,8 @@
         </div>
     {% else %}
         <div class="empty-state">
-            <div class="empty-state-icon">Sin registros aun</div>
-            <p>No hay registros de entradas y salidas aun.</p>
+            <div class="empty-state-icon">{{ translations.no_history_short }}</div>
+            <p>{{ translations.no_history }}</p>
         </div>
     {% endif %}
 </section>

@@ -1,5 +1,13 @@
 from django.contrib import admin
-from .models import AvisoEnCamino, Parqueadero, Entrada, PerfilUsuario, Vehiculo, Historial
+from .models import (
+    AvisoEnCamino,
+    Entrada,
+    Historial,
+    MetodoPago,
+    Parqueadero,
+    PerfilUsuario,
+    Vehiculo,
+)
 
 
 @admin.register(Parqueadero)
@@ -33,6 +41,13 @@ class HistorialAdmin(admin.ModelAdmin):
     list_filter = ('parqueadero', 'fecha')
     search_fields = ('usuario__user__username',)
     readonly_fields = ('costo',)
+
+@admin.register(MetodoPago)
+class MetodoPagoAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'marca', 'ultimos_cuatro', 'vencimiento', 'es_activa', 'actualizado_en')
+    list_filter = ('marca', 'es_activa')
+    search_fields = ('usuario__user__username', 'titular', 'ultimos_cuatro')
+    readonly_fields = ('ultimos_cuatro', 'marca', 'creado_en', 'actualizado_en')
 
 @admin.register(AvisoEnCamino)
 class AvisoEnCaminoAdmin(admin.ModelAdmin):

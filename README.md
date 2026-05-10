@@ -64,6 +64,18 @@ The goal of Flowgate is to reduce congestion, improve parking efficiency, and en
    http://127.0.0.1:8000/
    ```
 
+### Weather data
+FlowGate uses the Open-Meteo forecast API for current weather on the dashboard. No API key is required.
+
+By default the coordinates point to the La Aguacatala area in Medellin. You can override them before running the server:
+
+```bash
+set FLOWGATE_WEATHER_LATITUDE=6.198763
+set FLOWGATE_WEATHER_LONGITUDE=-75.5772014
+```
+
+If the API is unavailable, the app keeps running with a fixed fallback instead of random weather values.
+
 ---
 
 ## Contact

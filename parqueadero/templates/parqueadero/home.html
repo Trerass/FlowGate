@@ -11,10 +11,28 @@
 <section class="hero-panel animate-in" data-animate="hero">
     <div>
         <h1 class="hero-title">{{ translations.welcome }}</h1>
-        <p class="hero-kicker">{{ translations.dashboard }} en tiempo real</p>
+        <p class="hero-kicker">{{ translations.real_time_dashboard }}</p>
         <p class="hero-subtitle">{{ translations.updated_at }}: {{ updated_at }}</p>
     </div>
     <a href="{% url 'home' %}?lang={{ lang }}" class="action-pill">{{ translations.update }}</a>
+</section>
+
+<section class="summary-card animate-in" data-animate="summary">
+    <h2 class="section-title dark">{{ translations.summary }}</h2>
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span>{{ translations.total_slots }}</span>
+            <strong class="number-blue"><span class="count-up" data-count="{{ summary.total_slots }}">0</span></strong>
+        </div>
+        <div class="summary-item">
+            <span>{{ translations.occupied_slots }}</span>
+            <strong class="number-purple"><span class="count-up" data-count="{{ summary.occupied_slots }}">0</span></strong>
+        </div>
+        <div class="summary-item">
+            <span>{{ translations.available_slots }}</span>
+            <strong class="number-green"><span class="count-up" data-count="{{ summary.available_slots }}">0</span></strong>
+        </div>
+    </div>
 </section>
 
 <section class="advisory-card animate-in" data-animate="advisory">
@@ -56,11 +74,11 @@
         <div class="weather-description">{{ weather.description }}</div>
         <div class="weather-extra-grid">
             <div class="metric-pill">
-                <span class="mini-label">Humedad</span>
+                <span class="mini-label">{{ translations.humidity }}</span>
                 <strong><span class="count-up" data-count="{{ weather.humidity }}">0</span>%</strong>
             </div>
             <div class="metric-pill">
-                <span class="mini-label">Viento</span>
+                <span class="mini-label">{{ translations.wind }}</span>
                 <strong><span class="count-up" data-count="{{ weather.wind_speed }}">0</span> km/h</strong>
             </div>
         </div>
@@ -75,7 +93,7 @@
         <div class="metric-bar">
             <div class="metric-fill warning animate-bar" data-width="{{ congestion.percent }}"></div>
         </div>
-        <div class="metric-caption"><span class="count-up" data-count="{{ congestion.percent }}">0</span>% de congestion</div>
+        <div class="metric-caption"><span class="count-up" data-count="{{ congestion.percent }}">0</span>% {{ translations.congestion|lower }}</div>
         <div class="speed-card">
             <span class="mini-label">{{ translations.avg_speed }}</span>
             <strong><span class="count-up" data-count="{{ congestion.average_speed }}">0</span> km/h</strong>
@@ -102,16 +120,16 @@
                 <div class="metric-caption"><span class="count-up" data-count="{{ p.ocupancia_percent }}">0</span>% {{ translations.occupied }}</div>
 
                 <div class="entrance-block">
-                    <div class="entrance-title">Estado de entradas</div>
+                    <div class="entrance-title">{{ translations.entry_status }}</div>
                     {% for e in p.entradas %}
                         <div class="entrance-row">
                             <span>{{ e.nombre }}</span>
                             <div class="entrance-metrics">
                                 <span>
                                     {% if e.fila > 0 %}
-                                        <span class="count-up" data-count="{{ e.fila }}">0</span> en fila
+                                        <span class="count-up" data-count="{{ e.fila }}">0</span> {{ translations.in_queue }}
                                     {% else %}
-                                        sin fila
+                                        {{ translations.no_queue }}
                                     {% endif %}
                                 </span>
                                 <strong><span class="count-up" data-count="{{ e.tiempo_espera }}">0</span> {{ translations.minutes }}</strong>
@@ -121,24 +139,6 @@
                 </div>
             </article>
         {% endfor %}
-    </div>
-</section>
-
-<section class="summary-card animate-in" data-animate="summary">
-    <h2 class="section-title dark">{{ translations.summary }}</h2>
-    <div class="summary-grid">
-        <div class="summary-item">
-            <span>{{ translations.total_slots }}</span>
-            <strong class="number-blue"><span class="count-up" data-count="{{ summary.total_slots }}">0</span></strong>
-        </div>
-        <div class="summary-item">
-            <span>{{ translations.occupied_slots }}</span>
-            <strong class="number-purple"><span class="count-up" data-count="{{ summary.occupied_slots }}">0</span></strong>
-        </div>
-        <div class="summary-item">
-            <span>{{ translations.available_slots }}</span>
-            <strong class="number-green"><span class="count-up" data-count="{{ summary.available_slots }}">0</span></strong>
-        </div>
     </div>
 </section>
 {% endblock %}

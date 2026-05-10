@@ -10,39 +10,39 @@
 {% block content %}
 <section class="heading-header animate-in" data-animate="heading-header">
     <h1>{{ translations.on_the_way }}</h1>
-    <p>Avisa que vas en camino para obtener mejor informacion y reservar tu espacio.</p>
+    <p>{{ translations.on_the_way_subtitle }}</p>
 </section>
 
 {% if active_trip %}
     <section class="active-trip-panel animate-in" data-animate="active-trip">
         <div class="active-trip-top">
             <div>
-                <span class="trip-state">Viaje inicializado</span>
-                <h2>{{ active_trip.parqueadero.nombre }}</h2>
-                <p>Entrada {{ active_trip.entrada_nombre }}</p>
+                <span class="trip-state">{{ translations.trip_initialized }}</span>
+                <h2>{{ active_trip.parqueadero_nombre }}</h2>
+                <p>{{ translations.entrance }} {{ active_trip.entrada_nombre }}</p>
             </div>
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="cancel_trip">
-                <button type="submit" class="cancel-trip-button">Cancelar viaje</button>
+                <button type="submit" class="cancel-trip-button">{{ translations.cancel_trip }}</button>
             </form>
         </div>
         <div class="trip-status-grid">
             <div>
-                <span>Disponibilidad</span>
+                <span>{{ translations.availability }}</span>
                 <strong>{{ active_trip.available_slots }}</strong>
             </div>
             <div>
-                <span>Ocupacion</span>
+                <span>{{ translations.occupancy }}</span>
                 <strong>{{ active_trip.occupancy_percent }}%</strong>
             </div>
             <div>
-                <span>Fila actual</span>
+                <span>{{ translations.current_queue }}</span>
                 <strong>{{ active_trip.queue }}</strong>
             </div>
             <div>
-                <span>Llegada estimada</span>
-                <strong>{{ active_trip.remaining_minutes }} min</strong>
+                <span>{{ translations.estimated_arrival }}</span>
+                <strong>{{ active_trip.remaining_minutes }} {{ translations.minutes }}</strong>
             </div>
         </div>
     </section>
@@ -68,9 +68,9 @@
                                 <span>{{ entrada.nombre }}</span>
                                 <small>
                                     {% if entrada.fila > 0 %}
-                                        {{ entrada.fila }} en fila
+                                        {{ entrada.fila }} {{ translations.in_queue }}
                                     {% else %}
-                                        sin fila
+                                        {{ translations.no_queue }}
                                     {% endif %}
                                 </small>
                             </label>
@@ -83,14 +83,30 @@
 
     <section class="surface-panel animate-in" data-animate="heading-eta">
         <h2>{{ translations.eta }}</h2>
-        <div class="eta-shell">
-            <input type="range" name="eta" min="5" max="60" step="5" value="{{ eta }}" oninput="this.nextElementSibling.querySelector('strong').innerText = this.value">
-            <div class="eta-value"><strong>{{ eta }}</strong><span>{{ translations.minutes }}</span></div>
+        <div class="eta-shell" data-eta-control>
+            <div class="eta-range-wrap">
+                <input
+                    class="eta-range"
+                    type="range"
+                    name="eta"
+                    min="1"
+                    max="60"
+                    step="1"
+                    value="{{ eta }}"
+                    aria-label="{{ translations.eta }}"
+                    oninput="this.closest('[data-eta-control]').querySelector('[data-eta-value]').textContent = this.value; this.style.setProperty('--eta-progress', (((Number(this.value) - Number(this.min)) / (Number(this.max) - Number(this.min))) * 100) + '%')"
+                >
+                <div class="eta-range-labels" aria-hidden="true">
+                    <span>1</span>
+                    <span>60</span>
+                </div>
+            </div>
+            <div class="eta-value" aria-live="polite"><strong data-eta-value>{{ eta }}</strong><span>{{ translations.minutes }}</span></div>
         </div>
-        <div class="eta-note">Nota: El sistema ajustara automaticamente la disponibilidad basandose en tu tiempo estimado de llegada.</div>
+        <div class="eta-note">{{ translations.eta_note }}</div>
     </section>
 
-    <button type="submit" class="trip-button">{{ translations.start_trip }}</button>
+    <button type="submit" class="trip-button animate-in" data-animate="heading-button">{{ translations.start_trip }}</button>
 </form>
 {% endblock %}
 
@@ -121,5 +137,27 @@
     });
 
     updateSelectedDestination();
+
+    const etaControl = document.querySelector("[data-eta-control]");
+    if (etaControl) {
+        const etaRange = etaControl.querySelector(".eta-range");
+        const etaValue = etaControl.querySelector("[data-eta-value]");
+
+        const updateEtaDisplay = () => {
+            if (!etaRange || !etaValue) {
+                return;
+            }
+            const min = Number(etaRange.min);
+            const max = Number(etaRange.max);
+            const value = Number(etaRange.value);
+            const percent = ((value - min) / Math.max(1, max - min)) * 100;
+            etaValue.textContent = value;
+            etaRange.style.setProperty("--eta-progress", `${percent}%`);
+        };
+
+        etaRange.addEventListener("input", updateEtaDisplay);
+        etaRange.addEventListener("change", updateEtaDisplay);
+        updateEtaDisplay();
+    }
 </script>
 {% endblock %}

@@ -55,3 +55,36 @@
     margin-bottom: 15px;
     padding: 12px;
 }
+
+@media (max-width: 560px) {
+    .auth-container {
+        border: 1px solid rgba(41, 98, 242, 0.1);
+        border-radius: 26px;
+        box-shadow: 0 20px 42px rgba(24, 39, 75, 0.14);
+        margin: 18px auto;
+        padding: 24px;
+    }
+
+    .auth-title {
+        font-size: 1.65rem;
+        margin-bottom: 22px;
+    }
+
+    .auth-tabs {
+        display: grid;
+        gap: 0;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .auth-tab {
+        padding: 12px 8px;
+        text-align: center;
+        width: 100%;
+    }
+}
+
+@media (max-width: 380px) {
+    .auth-container {
+        padding: 18px;
+    }
+}

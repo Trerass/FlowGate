@@ -4,40 +4,157 @@
 {% block title %}Payments - FlowGate{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'parqueadero/css/payments.css' %}">
+<link rel="stylesheet" href="{% static 'parqueadero/css/payments.css' %}?v=payment-card-modal-cancel">
 {% endblock %}
 
 {% block content %}
 <section class="payments-header animate-in" data-animate="payments-header">
-    <h1>{{ translations.payments }}{% if user.is_authenticated %} y Saldo{% endif %}</h1>
-    <p>{% if user.is_authenticated %}{{ translations.manage_balance }}{% else %}Consulta las tarifas disponibles del parqueadero.{% endif %}</p>
+    <h1>{% if user.is_authenticated %}{{ translations.payment_title }}{% else %}{{ translations.payments }}{% endif %}</h1>
+    <p>{% if user.is_authenticated %}{{ translations.manage_balance }}{% else %}{{ translations.public_rates_intro }}{% endif %}</p>
 </section>
 
 {% if user.is_authenticated %}
+    <section class="payments-tabs animate-in" data-animate="payments-tabs">
+        <a href="{% url 'payments' %}?lang={{ lang }}&tab=rates" class="tab-item {% if active_tab == 'rates' %}active{% endif %}">{{ translations.rates }}</a>
+        <a href="{% url 'payments' %}?lang={{ lang }}&tab=recharge{% if amount %}&amount={{ amount }}{% endif %}" class="tab-item {% if active_tab == 'recharge' %}active{% endif %}">{{ translations.recharge }}</a>
+        <a href="{% url 'payments' %}?lang={{ lang }}&tab=history" class="tab-item {% if active_tab == 'history' %}active{% endif %}">{{ translations.payment_history }}</a>
+    </section>
+
+    {% if active_tab == "recharge" %}
     <section class="balance-card animate-in" data-animate="payments-balance">
         <div class="balance-main">
             <span>{{ translations.balance }}</span>
             <strong>$<span class="count-up" data-count="{{ projected_balance }}">0</span></strong>
         </div>
         <form method="get" class="recharge-form">
-            <input type="number" id="amount" name="amount" min="0" placeholder="Monto a recargar" {% if amount %}value="{{ amount }}"{% endif %}>
+            <input type="hidden" name="lang" value="{{ lang }}">
+            <input type="hidden" name="tab" value="recharge">
+            <input type="number" id="amount" name="amount" min="0" placeholder="{{ translations.recharge_placeholder }}" {% if amount %}value="{{ amount }}"{% endif %}>
             <button type="submit" class="recharge-button">{{ translations.recharge }}</button>
         </form>
         <div class="balance-note">
-            <span>Informacion</span>
+            <span>{{ translations.information }}</span>
             <p>{{ translations.simulated_balance }}</p>
         </div>
     </section>
 
-    <section class="payments-tabs animate-in" data-animate="payments-tabs">
-        <div class="tab-item active">{{ translations.rates }}</div>
-        <div class="tab-item">{{ translations.recharge }}</div>
-        <div class="tab-item">{{ translations.payment_history }}</div>
+    {% if show_payment_card %}
+    <section class="payment-card-shell payment-card-modal" data-payment-modal data-cancel-url="{% url 'payments' %}?lang={{ lang }}&tab=recharge" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+        <button type="button" class="payment-modal-backdrop" data-payment-modal-close aria-label="{{ translations.cancel_recharge }}"></button>
+        <div class="payment-modal-panel" data-payment-modal-panel>
+            <div class="payment-modal-header">
+                <div>
+                    <span>{{ translations.recharge }}</span>
+                    <h2 id="payment-modal-title">FlowGate Pay</h2>
+                </div>
+                <button type="button" class="payment-modal-close" data-payment-modal-close>{{ translations.cancel_recharge }}</button>
+            </div>
+
+            <form method="post" action="{% url 'payments' %}?lang={{ lang }}&tab=recharge" class="payment-card-form" autocomplete="off">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save_card">
+                <input type="hidden" name="amount" value="{{ amount }}">
+
+                <div class="payment-card-stage">
+                    <div class="payment-card-visual {% if payment_method %}has-saved-card{% endif %}" data-payment-card>
+                        <div class="payment-card-face payment-card-front">
+                            <div class="card-ambient card-ambient-one"></div>
+                            <div class="card-ambient card-ambient-two"></div>
+                            <div class="payment-card-top">
+                                <span class="card-chip" aria-hidden="true"></span>
+                                <span class="card-brand">FlowGate Pay</span>
+                            </div>
+                            <div class="payment-card-amount">
+                                <span>{{ translations.recharge }}</span>
+                                <strong>${{ amount }}</strong>
+                            </div>
+                            <label class="payment-card-field payment-card-number">
+                                <span>{{ translations.card_number }}</span>
+                                <input
+                                    type="text"
+                                    name="card_number"
+                                    inputmode="numeric"
+                                    autocomplete="cc-number"
+                                    maxlength="23"
+                                    placeholder="{% if payment_method %}{{ payment_method.numero_enmascarado }}{% else %}0000 0000 0000 0000{% endif %}"
+                                    data-card-front-input
+                                    required
+                                >
+                            </label>
+                            <div class="payment-card-row">
+                                <label class="payment-card-field">
+                                    <span>{{ translations.card_expiry }}</span>
+                                    <input
+                                        type="text"
+                                        name="expiry"
+                                        inputmode="numeric"
+                                        autocomplete="cc-exp"
+                                        maxlength="5"
+                                        placeholder="{% if payment_method %}{{ payment_method.vencimiento }}{% else %}MM/YY{% endif %}"
+                                        data-card-front-input
+                                        data-card-expiry
+                                        required
+                                    >
+                                </label>
+                                <button class="card-flip-button" type="button" data-card-back-trigger>{{ translations.card_cvv }}</button>
+                            </div>
+                            <label class="payment-card-field">
+                                <span>{{ translations.cardholder_name }}</span>
+                                <input
+                                    type="text"
+                                    name="card_name"
+                                    autocomplete="cc-name"
+                                    placeholder="{% if payment_method %}{{ payment_method.titular }}{% else %}NOMBRE DEL TITULAR{% endif %}"
+                                    data-card-front-input
+                                    required
+                                >
+                            </label>
+                        </div>
+
+                        <div class="payment-card-face payment-card-back">
+                            <div class="payment-card-strip"></div>
+                            <div class="payment-card-back-body">
+                                <div class="signature-strip">
+                                    <span>FlowGate</span>
+                                </div>
+                                <label class="payment-card-field cvv-field">
+                                    <span>{{ translations.card_cvv }}</span>
+                                    <input type="password" name="cvv" inputmode="numeric" autocomplete="cc-csc" maxlength="4" placeholder="CVV" data-card-cvv required>
+                                </label>
+                            </div>
+                            <p class="card-secure-note">{{ translations.card_secure_note }}</p>
+                            <button class="card-flip-button card-flip-button-light" type="button" data-card-front-trigger>{{ translations.back_to_card }}</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="payment-card-actions">
+                    <button type="submit" class="recharge-button payment-card-submit">{{ translations.save_card }}</button>
+                    <button type="button" class="payment-card-cancel" data-payment-modal-close>{{ translations.cancel_recharge }}</button>
+                    {% if payment_method %}
+                        <p>{{ payment_method.marca }} {{ translations.card_ending }} {{ payment_method.ultimos_cuatro }} · {{ translations.expires }} {{ payment_method.vencimiento }}</p>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
     </section>
+    {% endif %}
+
+    <section class="info-banner animate-in" data-animate="payments-info">
+        <h3>{{ translations.important_info }}</h3>
+        <ul>
+            <li>{{ translations.payment_rule_1 }}</li>
+            <li>{{ translations.payment_rule_2 }}</li>
+            <li>{{ translations.payment_rule_3 }}</li>
+            <li>{{ translations.payment_rule_4 }}</li>
+        </ul>
+    </section>
+    {% endif %}
 {% endif %}
 
+{% if active_tab == "rates" %}
 <section class="surface-panel animate-in" data-animate="payments-rates">
-    <h2>Tarifas de parqueadero</h2>
+    <h2>{{ translations.parking_rates_title }}</h2>
     <div class="rates-list animate-stagger" data-animate="payments-cards">
         {% for rate in rates %}
             <article class="rate-card tone-{{ rate.tone }} lift-card">
@@ -53,16 +170,160 @@
         {% endfor %}
     </div>
 </section>
-
-{% if user.is_authenticated %}
-    <section class="info-banner animate-in" data-animate="payments-info">
-        <h3>{{ translations.important_info }}</h3>
-        <ul>
-            <li>El cobro se realiza automaticamente al salir del parqueadero.</li>
-            <li>La primera hora o fraccion se cobra completa.</li>
-            <li>El sistema calcula el tiempo exacto de permanencia.</li>
-            <li>Asegurate de tener saldo suficiente antes de ingresar.</li>
-        </ul>
-    </section>
 {% endif %}
+
+{% if active_tab == "history" %}
+<section class="surface-panel payment-history-panel animate-in" data-animate="payments-history">
+    <h2>{{ translations.payment_history }}</h2>
+    <div class="empty-state">
+        <div class="empty-state-icon">{{ translations.no_history_short }}</div>
+        <p>{{ translations.no_profile_history }}</p>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const paymentCard = document.querySelector("[data-payment-card]");
+        if (!paymentCard) {
+            return;
+        }
+
+        const hasAnime = typeof anime !== "undefined";
+        const paymentModal = document.querySelector("[data-payment-modal]");
+        const paymentModalPanel = document.querySelector("[data-payment-modal-panel]");
+        const modalCloseTriggers = document.querySelectorAll("[data-payment-modal-close]");
+        const cancelUrl = paymentModal ? paymentModal.dataset.cancelUrl : "";
+        const cvvInput = document.querySelector("[data-card-cvv]");
+        const expiryInput = document.querySelector("[data-card-expiry]");
+        const backTriggers = document.querySelectorAll("[data-card-back-trigger]");
+        const frontTriggers = document.querySelectorAll("[data-card-front-trigger], [data-card-front-input]");
+        let isBackVisible = false;
+        let isClosingModal = false;
+        paymentCard.dataset.side = "front";
+
+        if (paymentModal) {
+            document.body.classList.add("payment-modal-open");
+
+            if (hasAnime && paymentModalPanel) {
+                paymentModal.style.opacity = 0;
+                paymentModalPanel.style.opacity = 0;
+                paymentModalPanel.style.transform = "translateY(34px) scale(0.94)";
+                paymentModalPanel.style.transformOrigin = "50% 58%";
+                anime.timeline()
+                    .add({
+                        targets: paymentModal,
+                        opacity: [0, 1],
+                        duration: 240,
+                        easing: "easeOutQuad",
+                    })
+                    .add({
+                        targets: paymentModalPanel,
+                        opacity: [0, 1],
+                        translateY: [34, 0],
+                        scale: [0.94, 1],
+                        duration: 760,
+                        easing: "spring(1, 86, 13, 0)",
+                    }, "-=80");
+            }
+
+            const closeModal = () => {
+                if (isClosingModal) {
+                    return;
+                }
+                isClosingModal = true;
+
+                const finishClose = () => {
+                    document.body.classList.remove("payment-modal-open");
+                    if (cancelUrl) {
+                        window.location.href = cancelUrl;
+                    } else {
+                        paymentModal.hidden = true;
+                    }
+                };
+
+                if (hasAnime && paymentModalPanel) {
+                    anime.remove([paymentModal, paymentModalPanel]);
+                    anime.timeline({ easing: "easeInOutQuad" })
+                        .add({
+                            targets: paymentModalPanel,
+                            opacity: [1, 0],
+                            translateY: [0, 28],
+                            scale: [1, 0.94],
+                            duration: 260,
+                        })
+                        .add({
+                            targets: paymentModal,
+                            opacity: [1, 0],
+                            duration: 180,
+                            complete: finishClose,
+                        }, "-=120");
+                } else {
+                    finishClose();
+                }
+            };
+
+            modalCloseTriggers.forEach((trigger) => {
+                trigger.addEventListener("click", closeModal);
+            });
+
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape" && !paymentModal.hidden) {
+                    closeModal();
+                }
+            });
+        }
+
+        if (expiryInput) {
+            expiryInput.addEventListener("input", () => {
+                const digits = expiryInput.value.replace(/\D/g, "").slice(0, 4);
+                expiryInput.value = digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+            });
+        }
+
+        const rotateCard = (showBack) => {
+            if (isBackVisible === showBack) {
+                return;
+            }
+            isBackVisible = showBack;
+            const targetRotation = showBack ? 180 : 0;
+            paymentCard.dataset.side = showBack ? "back" : "front";
+
+            if (hasAnime) {
+                anime.remove(paymentCard);
+                anime({
+                    targets: paymentCard,
+                    rotateY: targetRotation,
+                    duration: 680,
+                    easing: "easeInOutCubic",
+                });
+            } else {
+                paymentCard.style.transform = `rotateY(${targetRotation}deg)`;
+            }
+
+            if (showBack && cvvInput) {
+                window.setTimeout(() => cvvInput.focus(), 360);
+            }
+        };
+
+        backTriggers.forEach((trigger) => {
+            trigger.addEventListener("click", () => rotateCard(true));
+            trigger.addEventListener("focus", () => rotateCard(true));
+        });
+
+        if (cvvInput) {
+            cvvInput.addEventListener("click", (event) => event.stopPropagation());
+            cvvInput.addEventListener("focus", () => {
+                paymentCard.dataset.side = "back";
+            });
+        }
+
+        frontTriggers.forEach((trigger) => {
+            trigger.addEventListener("focus", () => rotateCard(false));
+            trigger.addEventListener("click", () => rotateCard(false));
+        });
+    });
+</script>
 {% endblock %}

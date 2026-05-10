@@ -1,12 +1,20 @@
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 
-from parqueadero.models import AvisoEnCamino, Entrada, Parqueadero, PerfilUsuario, Vehiculo
+from parqueadero.models import (
+    AvisoEnCamino,
+    Entrada,
+    MetodoPago,
+    Parqueadero,
+    PerfilUsuario,
+    Vehiculo,
+)
 
 
+@override_settings(FLOWGATE_WEATHER_API_ENABLED=False)
 class PublicViewsTests(TestCase):
     def setUp(self):
         parqueadero = Parqueadero.objects.create(nombre="Principal", capacidad=100)
@@ -23,7 +31,23 @@ class PublicViewsTests(TestCase):
         self.assertContains(response, "Tarifas de parqueadero")
         self.assertContains(response, "Personal - Automovil")
         self.assertNotContains(response, "Monto a recargar")
+        self.assertNotContains(response, "Numero de tarjeta")
         self.assertNotContains(response, "Historial")
+
+    def test_payments_post_publico_redirige_a_login(self):
+        response = self.client.post(
+            reverse("payments"),
+            {
+                "action": "save_card",
+                "card_number": "4111 1111 1111 1111",
+                "expiry": "12/30",
+                "cvv": "123",
+                "card_name": "Visitante",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login_view"), response["Location"])
+        self.assertFalse(MetodoPago.objects.exists())
 
     def test_heading_requiere_autenticacion(self):
         response = self.client.get(reverse("heading"), {"eta": 20})
@@ -52,7 +76,7 @@ class PublicViewsTests(TestCase):
         response = self.client.get(reverse("home"))
         self.assertNotContains(response, "Profesores")
 
-
+@override_settings(FLOWGATE_WEATHER_API_ENABLED=False)
 class AuthenticatedViewsTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="maria", password="123456")
@@ -97,6 +121,17 @@ class AuthenticatedViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "parqueadero/heading.html")
 
+    def test_heading_slider_usa_incrementos_de_un_minuto(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("heading"), {"eta": 1})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'min="1"')
+        self.assertContains(response, 'max="60"')
+        self.assertContains(response, 'step="1"')
+        self.assertContains(response, 'value="1"')
+        self.assertContains(response, "oninput=")
+        self.assertContains(response, "data-eta-value")
+
     def test_heading_muestra_parqueaderos_y_entradas_para_seleccionar(self):
         parqueadero = Parqueadero.objects.create(nombre="Visitantes", capacidad=40)
         entrada = Entrada.objects.create(nombre="Principal (Visitantes)", parqueadero=parqueadero, fila=2)
@@ -129,6 +164,22 @@ class AuthenticatedViewsTests(TestCase):
         self.assertContains(response, "Visitantes")
         self.assertContains(response, "Entrada Principal")
         self.assertContains(response, "Cancelar viaje")
+
+    def test_heading_crea_aviso_con_eta_de_un_minuto(self):
+        parqueadero = Parqueadero.objects.create(nombre="Visitantes", capacidad=40)
+        entrada = Entrada.objects.create(nombre="Principal (Visitantes)", parqueadero=parqueadero, fila=2)
+        self.client.login(username="maria", password="123456")
+        response = self.client.post(
+            reverse("heading"),
+            {
+                "parking": str(parqueadero.id),
+                "entrada": str(entrada.id),
+                "eta": "1",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        aviso = AvisoEnCamino.objects.get(entrada=entrada)
+        self.assertEqual(aviso.eta_minutos, 1)
 
     def test_heading_cancela_viaje_activo(self):
         parqueadero = Parqueadero.objects.create(nombre="Visitantes", capacidad=40)
@@ -195,10 +246,89 @@ class AuthenticatedViewsTests(TestCase):
         self.client.login(username="maria", password="123456")
         response = self.client.get(reverse("payments"), {"amount": 5000})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Personal - Automovil")
         self.assertContains(response, "Monto a recargar")
+        self.assertContains(response, "data-payment-modal")
+        self.assertContains(response, 'data-cancel-url="/payments/?lang=es&tab=recharge"')
+        self.assertContains(response, "payment-modal-panel")
+        self.assertContains(response, "Cancelar recarga")
+        self.assertContains(response, "payment-card-visual")
+        self.assertContains(response, "payment-card-front")
+        self.assertContains(response, "payment-card-back")
+        self.assertContains(response, "data-card-back-trigger")
+        self.assertContains(response, "data-card-expiry")
+        self.assertContains(response, "0000 0000 0000 0000")
         self.assertContains(response, "5000")
+        self.assertNotContains(response, "Personal - Automovil")
+
+    def test_payments_autenticado_oculta_tarjeta_hasta_recargar(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("payments"), {"tab": "recharge"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Monto a recargar")
+        self.assertNotContains(response, "payment-card-visual")
+        self.assertNotContains(response, "0000 0000 0000 0000")
+
+    def test_payments_autenticado_tarifas_no_muestra_recarga(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("payments"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Personal - Automovil")
+        self.assertContains(response, "Tarifas de parqueadero")
+        self.assertContains(response, "Recargar")
         self.assertContains(response, "Historial")
+        self.assertNotContains(response, "Monto a recargar")
+        self.assertNotContains(response, "payment-card-visual")
+
+    def test_payments_autenticado_historial_muestra_estado_vacio(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("payments"), {"tab": "history"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Historial")
+        self.assertContains(response, "Sin registros aun")
+        self.assertNotContains(response, "Monto a recargar")
+        self.assertNotContains(response, "Tarifas de parqueadero")
+
+    def test_payments_guarda_metodo_de_pago_seguro(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.post(
+            reverse("payments"),
+            {
+                "action": "save_card",
+                "card_number": "4111 1111 1111 1111",
+                "expiry": "12/30",
+                "cvv": "123",
+                "card_name": "Maria Gomez",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        metodo = MetodoPago.objects.get(usuario__user=self.user)
+        self.assertEqual(metodo.marca, "Visa")
+        self.assertEqual(metodo.ultimos_cuatro, "1111")
+        self.assertEqual(metodo.titular, "MARIA GOMEZ")
+        field_names = [field.name for field in MetodoPago._meta.get_fields()]
+        self.assertNotIn("cvv", field_names)
+        self.assertNotIn("card_number", field_names)
+
+        response = self.client.get(reverse("payments"), {"amount": 5000})
+        self.assertContains(response, "payment-card-visual has-saved-card")
+        self.assertContains(response, "**** **** **** 1111")
+        self.assertContains(response, "12/30")
+        self.assertContains(response, "MARIA GOMEZ")
+
+    def test_payments_rechaza_tarjeta_invalida(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.post(
+            reverse("payments"),
+            {
+                "action": "save_card",
+                "card_number": "123",
+                "expiry": "01/20",
+                "cvv": "12",
+                "card_name": "Maria Gomez",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(MetodoPago.objects.exists())
 
     def test_profile_actualiza_datos_personales(self):
         self.client.login(username="maria", password="123456")
@@ -291,6 +421,7 @@ class AuthenticatedViewsTests(TestCase):
         self.assertFalse(User.objects.filter(username="maria").exists())
 
 
+@override_settings(FLOWGATE_WEATHER_API_ENABLED=False)
 class AdminPanelTests(TestCase):
     def setUp(self):
         self.parqueadero = Parqueadero.objects.create(nombre="Norte", capacidad=100, ocupancia=30)

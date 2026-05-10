@@ -23,13 +23,13 @@
             </a>
 
             <ul class="navbar-menu">
-                <li><a href="{% url 'home' %}?lang={{ lang }}" class="nav-link">{{ translations.dashboard }}</a></li>
-                <li><a href="{% url 'payments' %}?lang={{ lang }}" class="nav-link">{{ translations.payments }}</a></li>
+                <li><a href="{% url 'home' %}?lang={{ lang }}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">{{ translations.dashboard }}</a></li>
+                <li><a href="{% url 'payments' %}?lang={{ lang }}" class="nav-link {% if request.resolver_match.url_name == 'payments' %}active{% endif %}">{{ translations.payments }}</a></li>
                 {% if user.is_authenticated %}
-                    <li><a href="{% url 'heading' %}?lang={{ lang }}" class="nav-link">{{ translations.on_the_way }}</a></li>
-                    <li><a href="{% url 'profile' %}?lang={{ lang }}" class="nav-link">{{ translations.profile }}</a></li>
+                    <li><a href="{% url 'heading' %}?lang={{ lang }}" class="nav-link {% if request.resolver_match.url_name == 'heading' %}active{% endif %}">{{ translations.on_the_way }}</a></li>
+                    <li><a href="{% url 'profile' %}?lang={{ lang }}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">{{ translations.profile }}</a></li>
                     {% if user.is_staff %}
-                        <li><a href="{% url 'admin_panel' %}?lang={{ lang }}" class="nav-link">Admin</a></li>
+                        <li><a href="{% url 'admin_panel' %}?lang={{ lang }}" class="nav-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">Admin</a></li>
                     {% endif %}
                 {% endif %}
             </ul>

@@ -113,7 +113,9 @@
 
 .destination-main input,
 .entry-option input {
-    display: none;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
 }
 
 .destination-main {
@@ -125,6 +127,20 @@
 .destination-card.selected {
     border-color: rgba(41, 98, 242, 0.4);
     box-shadow: 0 8px 18px rgba(41, 98, 242, 0.08);
+}
+
+.destination-card:has(input:checked) {
+    background: linear-gradient(135deg, rgba(41, 98, 242, 0.08), rgba(178, 72, 255, 0.08));
+    border-color: rgba(41, 98, 242, 0.42);
+    box-shadow: 0 12px 24px rgba(41, 98, 242, 0.12);
+    transform: translateY(-2px);
+}
+
+.destination-card.selected strong,
+.destination-card.selected span,
+.destination-card:has(input:checked) strong,
+.destination-card:has(input:checked) span {
+    color: var(--primary);
 }
 
 .destination-card:hover {
@@ -173,17 +189,124 @@
 .eta-shell {
     align-items: center;
     display: grid;
-    gap: 22px;
-    grid-template-columns: 1fr 110px;
+    gap: 28px;
+    grid-template-columns: minmax(0, 1fr) 118px;
 }
 
-.eta-shell input[type="range"] {
-    min-height: auto;
+.eta-range-wrap {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+}
+
+.eta-range {
+    --eta-progress: 0%;
+    --eta-track-bg: linear-gradient(
+        90deg,
+        var(--primary) 0%,
+        var(--primary) var(--eta-progress),
+        #e5ecf7 var(--eta-progress),
+        #e5ecf7 100%
+    );
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--eta-track-bg);
+    border: 1px solid #d6e1f1;
+    border-radius: 999px;
+    box-shadow: inset 0 1px 4px rgba(20, 35, 70, 0.14);
+    cursor: pointer;
+    height: 16px;
+    min-height: 16px;
     padding: 0;
+    width: 100%;
+}
+
+.eta-range:focus-visible {
+    outline: 4px solid rgba(41, 98, 242, 0.16);
+    outline-offset: 6px;
+}
+
+.eta-range:hover,
+.eta-range:active,
+.eta-range:focus-visible {
+    background: var(--eta-track-bg);
+}
+
+.eta-range::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--eta-track-bg);
+    border-radius: 999px;
+    height: 16px;
+}
+
+.eta-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #ffffff;
+    border: 5px solid var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 6px 16px rgba(41, 98, 242, 0.28);
+    height: 30px;
+    margin-top: -7px;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+    width: 30px;
+}
+
+.eta-range::-moz-range-track {
+    background: #e5ecf7;
+    border: 1px solid #d6e1f1;
+    border-radius: 999px;
+    box-shadow: inset 0 1px 4px rgba(20, 35, 70, 0.14);
+    height: 16px;
+}
+
+.eta-range::-moz-range-progress {
+    background: var(--primary);
+    border-radius: 999px;
+    height: 16px;
+}
+
+.eta-range::-moz-range-thumb {
+    background: #ffffff;
+    border: 5px solid var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 6px 16px rgba(41, 98, 242, 0.28);
+    height: 20px;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+    width: 20px;
+}
+
+.eta-range:hover::-webkit-slider-thumb,
+.eta-range:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 8px 20px rgba(41, 98, 242, 0.34);
+    transform: scale(1.06);
+}
+
+.eta-range:hover::-moz-range-thumb,
+.eta-range:focus-visible::-moz-range-thumb {
+    box-shadow: 0 8px 20px rgba(41, 98, 242, 0.34);
+    transform: scale(1.06);
+}
+
+.eta-range-labels {
+    color: var(--muted);
+    display: flex;
+    font-size: 0.85rem;
+    font-weight: 700;
+    justify-content: space-between;
+    padding: 0 2px;
 }
 
 .eta-value {
+    align-items: center;
+    background: #f3f7ff;
+    border: 1px solid rgba(41, 98, 242, 0.12);
+    border-radius: 22px;
     color: var(--primary);
+    display: grid;
+    min-height: 96px;
+    padding: 14px 10px;
     text-align: center;
     transition: transform 0.22s ease;
 }
@@ -191,6 +314,12 @@
 .eta-value strong {
     display: block;
     font-size: 3rem;
+    line-height: 1;
+}
+
+.eta-value span {
+    font-size: 0.95rem;
+    font-weight: 700;
 }
 
 .surface-panel:hover .eta-value {
@@ -209,6 +338,11 @@
     padding: 20px 28px;
 }
 
+.trip-button:focus-visible {
+    outline: 3px solid rgba(41, 98, 242, 0.22);
+    outline-offset: 4px;
+}
+
 @media (max-width: 960px) {
     .destination-grid,
     .eta-shell,
@@ -218,5 +352,128 @@
 
     .active-trip-top {
         flex-direction: column;
+    }
+}
+
+@media (max-width: 680px) {
+    .heading-header {
+        background:
+            radial-gradient(circle at 92% 0%, rgba(255, 255, 255, 0.28), transparent 34%),
+            linear-gradient(135deg, #173a83 0%, #2962f2 65%, #884cff 100%);
+        border-radius: 28px;
+        box-shadow: 0 20px 38px rgba(41, 98, 242, 0.18);
+        color: #fff;
+        margin-bottom: 16px;
+        padding: 24px;
+    }
+
+    .heading-header h1 {
+        font-size: clamp(2.1rem, 12vw, 2.7rem);
+        line-height: 1.05;
+    }
+
+    .heading-header p {
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.98rem;
+    }
+
+    .surface-panel,
+    .active-trip-panel {
+        border-radius: 24px;
+        padding: 20px;
+    }
+
+    .surface-panel h2,
+    .active-trip-panel h2 {
+        font-size: 1.55rem;
+    }
+
+    .destination-grid {
+        gap: 14px;
+    }
+
+    .destination-card {
+        border-radius: 20px;
+        padding: 16px;
+    }
+
+    .destination-card strong {
+        font-size: 1.12rem;
+    }
+
+    .entry-option {
+        align-items: center;
+        flex-direction: row;
+        gap: 8px;
+        padding: 13px 14px;
+    }
+
+    .eta-shell {
+        gap: 18px;
+    }
+
+    .eta-value {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        min-height: 72px;
+        padding: 14px 16px;
+    }
+
+    .eta-range {
+        height: 18px;
+        min-height: 18px;
+    }
+
+    .eta-range::-webkit-slider-runnable-track {
+        height: 18px;
+    }
+
+    .eta-range::-webkit-slider-thumb {
+        height: 32px;
+        margin-top: -7px;
+        width: 32px;
+    }
+
+    .eta-value strong {
+        font-size: 2.35rem;
+    }
+
+    .eta-note {
+        border-radius: 16px;
+        padding: 16px;
+    }
+
+    .trip-status-grid div {
+        padding: 16px;
+    }
+
+    .trip-status-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .trip-status-grid strong {
+        font-size: 1.65rem;
+    }
+
+    .cancel-trip-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .surface-panel,
+    .active-trip-panel {
+        padding: 18px;
+    }
+
+    .entry-option {
+        align-items: flex-start;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .trip-status-grid {
+        grid-template-columns: 1fr;
     }
 }

@@ -34,18 +34,18 @@
                 {% for registro in historial %}
                     <div class="history-item">
                         <div>
-                            <strong>{{ registro.parqueadero.nombre }}</strong>
+                            <strong>{{ registro.display_parqueadero }}</strong>
                             <p>{{ registro.fecha|date:"d/m/Y" }} · {{ registro.hora_entrada|time:"H:i" }}</p>
                         </div>
                         <div class="history-meta">
-                            <span>{% if registro.entrada %}{{ registro.entrada.nombre }}{% else %}N/A{% endif %}</span>
-                            <strong>{% if registro.costo == 0 %}{{ translations.free }}{% else %}${{ registro.costo|stringformat:",.0f" }}{% endif %}</strong>
+                            <span>{{ registro.display_entrada }}</span>
+                            <strong>{% if registro.costo == 0 %}{{ translations.free }}{% else %}${{ registro.display_costo }}{% endif %}</strong>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-            <p class="empty-copy">No hay registros de historial todavia.</p>
+            <p class="empty-copy">{{ translations.no_profile_history }}</p>
         {% endif %}
     </section>
 {% else %}
@@ -77,9 +77,9 @@
                     <div class="form-group">
                         <label for="tipo_usuario">{{ translations.user_type }}</label>
                         <select id="tipo_usuario" name="tipo_usuario">
-                            <option value="estudiante" {% if perfil.tipo_usuario == 'estudiante' %}selected{% endif %}>Estudiante</option>
-                            <option value="profesor" {% if perfil.tipo_usuario == 'profesor' %}selected{% endif %}>Profesor</option>
-                            <option value="trabajador" {% if perfil.tipo_usuario == 'trabajador' %}selected{% endif %}>Trabajador</option>
+                            <option value="estudiante" {% if perfil.tipo_usuario == 'estudiante' %}selected{% endif %}>{{ translations.student }}</option>
+                            <option value="profesor" {% if perfil.tipo_usuario == 'profesor' %}selected{% endif %}>{{ translations.teacher }}</option>
+                            <option value="trabajador" {% if perfil.tipo_usuario == 'trabajador' %}selected{% endif %}>{{ translations.worker }}</option>
                         </select>
                     </div>
                 {% endif %}
@@ -115,8 +115,8 @@
                 <div class="form-group">
                     <label for="tipo_vehiculo">{{ translations.vehicle_type }}</label>
                     <select id="tipo_vehiculo" name="tipo_vehiculo">
-                        <option value="carro" {% if vehiculo and vehiculo.tipo_vehiculo == 'carro' %}selected{% endif %}>Automovil</option>
-                        <option value="moto" {% if vehiculo and vehiculo.tipo_vehiculo == 'moto' %}selected{% endif %}>Motocicleta</option>
+                        <option value="carro" {% if vehiculo and vehiculo.tipo_vehiculo == 'carro' %}selected{% endif %}>{{ translations.car }}</option>
+                        <option value="moto" {% if vehiculo and vehiculo.tipo_vehiculo == 'moto' %}selected{% endif %}>{{ translations.motorcycle }}</option>
                     </select>
                 </div>
                 <div class="form-group switch-group">
@@ -130,9 +130,9 @@
                 <span>{{ translations.current_rate }}</span>
                 <strong>
                     {% if vehiculo %}
-                        {% if vehiculo.precio_diario == 0 %}{{ translations.free }}{% else %}${{ vehiculo.precio_diario|stringformat:",.0f" }} / dia{% endif %}
+                        {% if vehiculo.precio_diario == 0 %}{{ translations.free }}{% else %}${{ vehiculo.precio_diario }} {{ translations.per_day }}{% endif %}
                     {% else %}
-                        $8700 / dia
+                        $8700 {{ translations.per_day }}
                     {% endif %}
                 </strong>
             </div>
@@ -149,7 +149,7 @@
         <div class="section-row">
             <h2>{{ translations.account_settings }}</h2>
         </div>
-        <p>Si eliminas la cuenta, tambien se eliminaran tus datos asociados, tu vehiculo y tu historial.</p>
+        <p>{{ translations.delete_account_warning }}</p>
         <form method="post">
             {% csrf_token %}
             <button type="submit" class="danger-action" name="action" value="delete_account">{{ translations.delete_account }}</button>

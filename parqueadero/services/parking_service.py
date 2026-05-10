@@ -1,11 +1,11 @@
-import random
 from datetime import datetime
 
 from django.utils import timezone
 
 from parqueadero.models import AvisoEnCamino, Entrada, Parqueadero
 
-from .localization import get_translation
+from .localization import get_translation, translate_entrance_name, translate_parking_name
+from .weather_service import get_current_weather
 
 
 def _can_view_parking(parqueadero, user):
@@ -21,8 +21,9 @@ def _can_view_parking(parqueadero, user):
         return False
 
 
-def _entrance_display_name(name):
-    return name.split("(", 1)[0].strip()
+def _entrance_display_name(name, lang):
+    display_name = name.split("(", 1)[0].strip()
+    return translate_entrance_name(display_name, lang)
 
 
 def process_due_arrivals():
@@ -37,44 +38,6 @@ def process_due_arrivals():
         notice.entrada.save(update_fields=["fila"])
         notice.agregado_a_fila = True
         notice.save(update_fields=["agregado_a_fila"])
-
-
-def _build_weather(lang):
-    weather_options = [
-        {
-            "es": {"label": "Nublado", "description": "Brisa ligera"},
-            "en": {"label": "Cloudy", "description": "Light breeze"},
-            "temperature": random.randint(19, 28),
-            "humidity": random.randint(55, 82),
-            "wind_speed": random.randint(6, 18),
-            "icon": "cloud",
-        },
-        {
-            "es": {"label": "Soleado", "description": "Buen tiempo para conducir"},
-            "en": {"label": "Sunny", "description": "Good conditions for driving"},
-            "temperature": random.randint(23, 31),
-            "humidity": random.randint(38, 60),
-            "wind_speed": random.randint(5, 14),
-            "icon": "sun",
-        },
-        {
-            "es": {"label": "Lluvioso", "description": "Maneja con precaucion"},
-            "en": {"label": "Rainy", "description": "Drive carefully"},
-            "temperature": random.randint(17, 24),
-            "humidity": random.randint(75, 95),
-            "wind_speed": random.randint(8, 22),
-            "icon": "rain",
-        },
-    ]
-    selected = random.choice(weather_options)
-    return {
-        "label": selected[lang]["label"],
-        "description": selected[lang]["description"],
-        "temperature": selected["temperature"],
-        "humidity": selected["humidity"],
-        "wind_speed": selected["wind_speed"],
-        "icon": selected["icon"],
-    }
 
 
 def _occupancy_label(occupancy_percent, lang):
@@ -147,7 +110,7 @@ def get_parking_data(lang, user=None):
             entrada_data.append(
                 {
                     "id": entrada.id,
-                    "nombre": _entrance_display_name(entrada.nombre),
+                    "nombre": _entrance_display_name(entrada.nombre, lang),
                     "fila": fila,
                     "tiempo_espera": tiempo_espera,
                     "highlight": "primary" if index == 0 else "default",
@@ -158,7 +121,7 @@ def get_parking_data(lang, user=None):
         parqueadero_data.append(
             {
                 "id": parqueadero.id,
-                "nombre": parqueadero.nombre,
+                "nombre": translate_parking_name(parqueadero.nombre, lang),
                 "capacidad": parqueadero.capacidad,
                 "ocupancia": ocupancia,
                 "ocupancia_percent": round(occupancy_percent),
@@ -179,7 +142,7 @@ def get_parking_data(lang, user=None):
         congestion_key = "low"
 
     average_speed = max(12, round(48 - (congestion_percent * 0.34)))
-    weather = _build_weather(lang)
+    weather = get_current_weather(lang)
     total_available = max(total_capacity - total_occupancy, 0)
     average_wait = round(
         sum(

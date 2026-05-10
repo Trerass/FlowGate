@@ -234,7 +234,7 @@
 .weather-main {
     font-size: 4rem;
     font-weight: 800;
-    letter-spacing: -0.05em;
+    letter-spacing: 0;
     margin-top: 34px;
 }
 
@@ -363,6 +363,7 @@
 .parking-card-header {
     align-items: center;
     display: flex;
+    gap: 14px;
     justify-content: space-between;
     margin-bottom: 16px;
 }
@@ -495,5 +496,400 @@
 
     .advisory-card {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 680px) {
+    .hero-panel {
+        background:
+            radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.32), transparent 32%),
+            linear-gradient(135deg, #1d4ed8 0%, #315ff4 58%, #8c47ff 100%);
+        align-items: center;
+        border-radius: 22px;
+        box-shadow: 0 16px 30px rgba(41, 98, 242, 0.18);
+        color: #fff;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        margin-bottom: 8px;
+        overflow: hidden;
+        padding: 14px;
+        position: relative;
+    }
+
+    .hero-title {
+        font-size: clamp(1.45rem, 6.3vw, 1.9rem);
+        line-height: 1.08;
+        max-width: 8.8em;
+    }
+
+    .hero-kicker,
+    .hero-subtitle {
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .hero-kicker {
+        font-size: 0.82rem;
+        margin-top: 5px;
+    }
+
+    .hero-subtitle {
+        font-size: 0.74rem;
+        margin-top: 4px;
+    }
+
+    .action-pill {
+        background: #fff;
+        border-radius: 14px;
+        color: var(--primary);
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 14px;
+        text-align: center;
+        width: auto;
+    }
+
+    .advisory-card {
+        border-radius: 20px;
+        gap: 10px;
+        grid-template-columns: 42px minmax(0, 1fr);
+        margin-bottom: 10px;
+        padding: 12px;
+    }
+
+    .section-shell,
+    .summary-card,
+    .insight-card {
+        padding: 22px;
+    }
+
+    .advisory-icon {
+        border-radius: 15px;
+        border-width: 2px;
+        font-size: 1.25rem;
+        height: 42px;
+        width: 42px;
+    }
+
+    .advisory-card h2 {
+        font-size: 1.12rem;
+        line-height: 1.15;
+        margin-bottom: 5px;
+    }
+
+    .advisory-card p {
+        display: -webkit-box;
+        font-size: 0.88rem;
+        line-height: 1.35;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    .advisory-meta {
+        display: grid;
+        gap: 6px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 9px;
+    }
+
+    .advisory-meta span {
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(245, 180, 0, 0.16);
+        border-radius: 12px;
+        font-size: 0.78rem;
+        line-height: 1.25;
+        padding: 8px;
+    }
+
+    .section-title {
+        font-size: 1.55rem;
+    }
+
+    .insight-grid {
+        gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-bottom: 12px;
+    }
+
+    .insight-card {
+        border-radius: 20px;
+        min-width: 0;
+        padding: 14px;
+    }
+
+    .weather-card {
+        min-height: 178px;
+    }
+
+    .weather-main {
+        font-size: 2rem;
+        letter-spacing: 0;
+        margin-top: 12px;
+    }
+
+    .weather-state {
+        font-size: 0.98rem;
+        margin-bottom: 3px;
+    }
+
+    .weather-description {
+        display: none;
+    }
+
+    .weather-extra-grid {
+        gap: 7px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .weather-icon {
+        border-radius: 14px;
+        font-size: 1.45rem;
+        height: 42px;
+        width: 42px;
+    }
+
+    .weather-orb-one {
+        height: 116px;
+        width: 116px;
+    }
+
+    .weather-orb-two {
+        height: 78px;
+        right: 44px;
+        top: 46px;
+        width: 78px;
+    }
+
+    .weather-ground {
+        height: 48px;
+    }
+
+    .insight-heading {
+        font-size: 0.92rem;
+    }
+
+    .mini-label {
+        font-size: 0.72rem;
+        margin-bottom: 3px;
+    }
+
+    .metric-pill strong {
+        font-size: 0.86rem;
+    }
+
+    .insight-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .metric-bar {
+        height: 10px;
+    }
+
+    .metric-caption {
+        font-size: 0.82rem;
+        margin-top: 7px;
+    }
+
+    .status-badge {
+        font-size: 0.76rem;
+        padding: 7px 10px;
+    }
+
+    .speed-card {
+        border-radius: 14px;
+        margin-top: 12px;
+        padding: 11px;
+    }
+
+    .speed-card strong {
+        font-size: 1.15rem;
+    }
+
+    .section-shell {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        margin-bottom: 12px;
+        padding: 0;
+    }
+
+    .section-shell:hover {
+        border-color: transparent;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .parking-grid {
+        gap: 10px;
+    }
+
+    .parking-card {
+        border-radius: 20px;
+        padding: 14px;
+    }
+
+    .parking-card-header {
+        align-items: center;
+        flex-direction: row;
+    }
+
+    .parking-card-header h3 {
+        font-size: 1.18rem;
+    }
+
+    .parking-numbers strong {
+        font-size: 1.55rem;
+    }
+
+    .availability {
+        font-size: 0.95rem !important;
+    }
+
+    .entrance-block {
+        margin-top: 14px;
+    }
+
+    .entrance-title {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .entrance-row {
+        align-items: center;
+        border-radius: 13px;
+        flex-direction: row;
+        gap: 8px;
+        margin-top: 8px;
+        padding: 10px;
+    }
+
+    .entrance-row span {
+        font-size: 0.88rem;
+    }
+
+    .entrance-row:hover {
+        transform: none;
+    }
+
+    .entrance-metrics {
+        align-items: flex-end;
+        display: grid;
+        gap: 4px;
+        justify-items: end;
+        width: auto;
+    }
+
+    .summary-card {
+        border-radius: 20px;
+        margin-bottom: 10px;
+        padding: 12px;
+    }
+
+    .summary-card .section-title {
+        font-size: 0.9rem;
+        margin-bottom: 9px;
+    }
+
+    .summary-grid {
+        gap: 7px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 0;
+    }
+
+    .summary-item {
+        background: #f7faff;
+        border: 1px solid rgba(41, 98, 242, 0.08);
+        border-radius: 14px;
+        padding: 10px 6px;
+    }
+
+    .summary-item strong {
+        font-size: 1.32rem;
+        margin-top: 4px;
+    }
+
+    .summary-item span {
+        font-size: 0.7rem;
+        line-height: 1.15;
+    }
+}
+
+@media (max-width: 420px) {
+    .section-shell {
+        padding: 0;
+    }
+
+    .insight-card,
+    .parking-card {
+        padding: 12px;
+    }
+
+    .hero-panel {
+        grid-template-columns: minmax(0, 1fr) auto;
+        padding: 12px;
+    }
+
+    .action-pill {
+        font-size: 0.88rem;
+        min-height: 36px;
+        padding: 0 12px;
+        width: auto;
+    }
+
+    .status-badge {
+        justify-content: center;
+        padding: 7px 10px;
+        width: auto;
+    }
+
+    .advisory-card {
+        grid-template-columns: 40px minmax(0, 1fr);
+        padding: 12px;
+    }
+
+    .advisory-icon {
+        border-radius: 14px;
+        font-size: 1.15rem;
+        height: 40px;
+        width: 40px;
+    }
+
+    .advisory-meta {
+        grid-template-columns: 1fr;
+    }
+
+    .parking-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .entrance-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .entrance-metrics {
+        align-items: flex-start;
+        justify-items: start;
+    }
+
+    .summary-card {
+        padding: 12px;
+    }
+
+    .summary-grid {
+        gap: 6px;
+    }
+
+    .summary-item strong {
+        font-size: 1.18rem;
+    }
+
+    .summary-item span {
+        font-size: 0.68rem;
     }
 }

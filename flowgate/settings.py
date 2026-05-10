@@ -101,6 +101,14 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Weather
+# Defaults point to the La Aguacatala area. Override with environment
+# variables if the deployment should represent another location.
+FLOWGATE_WEATHER_LATITUDE = float(os.getenv("FLOWGATE_WEATHER_LATITUDE", "6.198763"))
+FLOWGATE_WEATHER_LONGITUDE = float(os.getenv("FLOWGATE_WEATHER_LONGITUDE", "-75.5772014"))
+FLOWGATE_WEATHER_API_ENABLED = os.getenv("FLOWGATE_WEATHER_API_ENABLED", "True") == "True"
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
