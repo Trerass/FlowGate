@@ -166,6 +166,12 @@ canvas {
     width: 42px;
 }
 
+.brand-logo {
+    height: 64px;
+    object-fit: contain;
+    width: 64px;
+}
+
 .navbar-menu {
     display: flex;
     gap: 28px;
@@ -623,6 +629,11 @@ select:hover {
         width: 32px;
     }
 
+    .brand-logo {
+        height: 46px;
+        width: 46px;
+    }
+
     .nav-actions {
         align-items: center;
         display: flex;
@@ -702,6 +713,11 @@ select:hover {
     .brand-mark {
         height: 34px;
         width: 34px;
+    }
+
+    .brand-logo {
+        height: 48px;
+        width: 48px;
     }
 
     .language-selector a {

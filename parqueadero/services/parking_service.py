@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.db.models import Count
 from django.utils import timezone
 
 from parqueadero.models import AvisoEnCamino, Entrada, Parqueadero
@@ -38,6 +39,19 @@ def process_due_arrivals():
         notice.entrada.save(update_fields=["fila"])
         notice.agregado_a_fila = True
         notice.save(update_fields=["agregado_a_fila"])
+
+
+def get_active_trip_counts():
+    process_due_arrivals()
+    return dict(
+        AvisoEnCamino.objects.filter(
+            agregado_a_fila=False,
+            cancelado=False,
+        )
+        .values("entrada_id")
+        .annotate(total=Count("id"))
+        .values_list("entrada_id", "total")
+    )
 
 
 def _occupancy_label(occupancy_percent, lang):
@@ -82,7 +96,7 @@ def _calculate_wait_time(queue_size, available_slots, occupancy_percent):
 
 
 def get_parking_data(lang, user=None):
-    process_due_arrivals()
+    active_trip_counts = get_active_trip_counts()
     parqueaderos = Parqueadero.objects.all().order_by("nombre")
     parqueadero_data = []
     total_fila = 0
@@ -112,6 +126,7 @@ def get_parking_data(lang, user=None):
                     "id": entrada.id,
                     "nombre": _entrance_display_name(entrada.nombre, lang),
                     "fila": fila,
+                    "en_camino": active_trip_counts.get(entrada.id, 0),
                     "tiempo_espera": tiempo_espera,
                     "highlight": "primary" if index == 0 else "default",
                 }

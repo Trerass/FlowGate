@@ -164,6 +164,8 @@ class AuthenticatedViewsTests(TestCase):
         self.assertContains(response, "Visitantes")
         self.assertContains(response, "Entrada Principal")
         self.assertContains(response, "Cancelar viaje")
+        self.assertContains(response, "Personas en camino")
+        self.assertContains(response, "1 en camino")
 
     def test_heading_crea_aviso_con_eta_de_un_minuto(self):
         parqueadero = Parqueadero.objects.create(nombre="Visitantes", capacidad=40)
@@ -241,6 +243,73 @@ class AuthenticatedViewsTests(TestCase):
         aviso = AvisoEnCamino.objects.get(entrada=entrada)
         self.assertEqual(entrada.fila, 3)
         self.assertTrue(aviso.agregado_a_fila)
+
+    def test_heading_muestra_personas_en_camino_por_entrada(self):
+        parqueadero = Parqueadero.objects.create(nombre="Visitantes", capacidad=40)
+        entrada = Entrada.objects.create(nombre="Principal (Visitantes)", parqueadero=parqueadero, fila=2)
+        otra_entrada = Entrada.objects.create(nombre="Norte (Visitantes)", parqueadero=parqueadero, fila=0)
+        otro_usuario = User.objects.create_user(username="carlos", password="123456")
+        otro_perfil = PerfilUsuario.objects.create(user=otro_usuario)
+        perfil = PerfilUsuario.objects.get(user=self.user)
+        AvisoEnCamino.objects.create(
+            usuario=perfil,
+            parqueadero=parqueadero,
+            entrada=entrada,
+            eta_minutos=10,
+            llegada_estimada=timezone.now() + timedelta(minutes=10),
+        )
+        AvisoEnCamino.objects.create(
+            usuario=otro_perfil,
+            parqueadero=parqueadero,
+            entrada=entrada,
+            eta_minutos=12,
+            llegada_estimada=timezone.now() + timedelta(minutes=12),
+        )
+        AvisoEnCamino.objects.create(
+            usuario=otro_perfil,
+            parqueadero=parqueadero,
+            entrada=otra_entrada,
+            eta_minutos=5,
+            llegada_estimada=timezone.now() + timedelta(minutes=5),
+            cancelado=True,
+        )
+
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("heading"))
+
+        self.assertContains(response, "2 en camino")
+        self.assertContains(response, "0 en camino")
+
+    def test_heading_status_retorna_conteos_en_tiempo_real(self):
+        parqueadero = Parqueadero.objects.create(nombre="Visitantes", capacidad=40)
+        entrada = Entrada.objects.create(nombre="Principal (Visitantes)", parqueadero=parqueadero, fila=2)
+        otro_usuario = User.objects.create_user(username="carlos", password="123456")
+        otro_perfil = PerfilUsuario.objects.create(user=otro_usuario)
+        perfil = PerfilUsuario.objects.get(user=self.user)
+        AvisoEnCamino.objects.create(
+            usuario=perfil,
+            parqueadero=parqueadero,
+            entrada=entrada,
+            eta_minutos=10,
+            llegada_estimada=timezone.now() + timedelta(minutes=10),
+        )
+        AvisoEnCamino.objects.create(
+            usuario=otro_perfil,
+            parqueadero=parqueadero,
+            entrada=entrada,
+            eta_minutos=20,
+            llegada_estimada=timezone.now() + timedelta(minutes=20),
+        )
+
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("heading_status"))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["entries"][str(entrada.id)]["queue"], 2)
+        self.assertEqual(data["entries"][str(entrada.id)]["on_the_way"], 2)
+        self.assertEqual(data["active_trip"]["entry_id"], entrada.id)
+        self.assertEqual(data["active_trip"]["on_the_way"], 2)
 
     def test_payments_autenticado_muestra_funciones_de_pago(self):
         self.client.login(username="maria", password="123456")

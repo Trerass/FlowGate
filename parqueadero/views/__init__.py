@@ -1,6 +1,6 @@
 from .admin_panel import admin_panel
 from .auth import login_view, logout_view
-from .heading import heading
+from .heading import heading, heading_status
 from .history import history
 from .home import home
 from .payments import payments

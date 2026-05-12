@@ -38,11 +38,15 @@
             </div>
             <div>
                 <span>{{ translations.current_queue }}</span>
-                <strong>{{ active_trip.queue }}</strong>
+                <strong data-active-queue>{{ active_trip.queue }}</strong>
+            </div>
+            <div>
+                <span>{{ translations.people_on_the_way }}</span>
+                <strong data-active-on-the-way>{{ active_trip.on_the_way }}</strong>
             </div>
             <div>
                 <span>{{ translations.estimated_arrival }}</span>
-                <strong>{{ active_trip.remaining_minutes }} {{ translations.minutes }}</strong>
+                <strong><span data-active-remaining>{{ active_trip.remaining_minutes }}</span> {{ translations.minutes }}</strong>
             </div>
         </div>
     </section>
@@ -63,15 +67,20 @@
                     </label>
                     <div class="entry-options">
                         {% for entrada in option.entradas %}
-                            <label class="entry-option">
+                            <label class="entry-option" data-entry-id="{{ entrada.id }}">
                                 <input type="radio" name="entrada" value="{{ entrada.id }}" data-parking="{{ option.id }}" required>
                                 <span>{{ entrada.nombre }}</span>
-                                <small>
-                                    {% if entrada.fila > 0 %}
-                                        {{ entrada.fila }} {{ translations.in_queue }}
-                                    {% else %}
-                                        {{ translations.no_queue }}
-                                    {% endif %}
+                                <small class="entry-live-metrics">
+                                    <span data-entry-queue>
+                                        {% if entrada.fila > 0 %}
+                                            {{ entrada.fila }} {{ translations.in_queue }}
+                                        {% else %}
+                                            {{ translations.no_queue }}
+                                        {% endif %}
+                                    </span>
+                                    <span data-entry-on-the-way>
+                                        {{ entrada.en_camino }} {{ translations.on_the_way_count }}
+                                    </span>
                                 </small>
                             </label>
                         {% endfor %}
@@ -114,6 +123,12 @@
 <script>
     const parkingInputs = document.querySelectorAll('input[name="parking"]');
     const entryInputs = document.querySelectorAll('input[name="entrada"]');
+    const statusUrl = "{% url 'heading_status' %}?lang={{ lang }}";
+    const translations = {
+        inQueue: "{{ translations.in_queue|escapejs }}",
+        noQueue: "{{ translations.no_queue|escapejs }}",
+        onTheWayCount: "{{ translations.on_the_way_count|escapejs }}",
+    };
 
     const updateSelectedDestination = () => {
         document.querySelectorAll(".destination-card").forEach((card) => {
@@ -159,5 +174,53 @@
         etaRange.addEventListener("change", updateEtaDisplay);
         updateEtaDisplay();
     }
+
+    const updateHeadingStatus = async () => {
+        try {
+            const response = await fetch(statusUrl, {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+            });
+            if (!response.ok) {
+                return;
+            }
+            const data = await response.json();
+            Object.entries(data.entries || {}).forEach(([entryId, entry]) => {
+                const row = document.querySelector(`[data-entry-id="${entryId}"]`);
+                if (!row) {
+                    return;
+                }
+                const queue = row.querySelector("[data-entry-queue]");
+                const onTheWay = row.querySelector("[data-entry-on-the-way]");
+                if (queue) {
+                    queue.textContent = entry.queue > 0 ? `${entry.queue} ${translations.inQueue}` : translations.noQueue;
+                }
+                if (onTheWay) {
+                    onTheWay.textContent = `${entry.on_the_way} ${translations.onTheWayCount}`;
+                }
+            });
+
+            if (data.active_trip) {
+                const activeQueue = document.querySelector("[data-active-queue]");
+                const activeOnTheWay = document.querySelector("[data-active-on-the-way]");
+                const activeRemaining = document.querySelector("[data-active-remaining]");
+                if (activeQueue) {
+                    activeQueue.textContent = data.active_trip.queue;
+                }
+                if (activeOnTheWay) {
+                    activeOnTheWay.textContent = data.active_trip.on_the_way;
+                }
+                if (activeRemaining) {
+                    activeRemaining.textContent = data.active_trip.remaining_minutes;
+                }
+            }
+        } catch (error) {
+            // Keep the current values visible if the connection drops.
+        }
+    };
+
+    updateHeadingStatus();
+    window.setInterval(updateHeadingStatus, 5000);
 </script>
 {% endblock %}

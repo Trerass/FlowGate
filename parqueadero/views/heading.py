@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
@@ -13,11 +14,38 @@ from parqueadero.services import (
     translate_entrance_name,
     translate_parking_name,
 )
-from parqueadero.services.parking_service import _can_view_parking
+from parqueadero.services.parking_service import _can_view_parking, get_active_trip_counts
 
 
 def _clean_entry_name(name, lang):
     return translate_entrance_name(name.split("(", 1)[0].strip(), lang)
+
+
+def _active_trip_payload(active_notice, lang):
+    if not active_notice:
+        return None
+
+    remaining_seconds = max(0, int((active_notice.llegada_estimada - timezone.now()).total_seconds()))
+    remaining_minutes = (remaining_seconds + 59) // 60
+    occupancy_percent = (
+        round((active_notice.parqueadero.ocupancia / active_notice.parqueadero.capacidad) * 100)
+        if active_notice.parqueadero.capacidad
+        else 0
+    )
+    active_counts = get_active_trip_counts()
+
+    return {
+        "parqueadero": active_notice.parqueadero,
+        "parqueadero_nombre": translate_parking_name(active_notice.parqueadero.nombre, lang),
+        "entrada": active_notice.entrada,
+        "entrada_nombre": _clean_entry_name(active_notice.entrada.nombre, lang),
+        "eta_minutos": active_notice.eta_minutos,
+        "remaining_minutes": remaining_minutes,
+        "available_slots": max(active_notice.parqueadero.capacidad - active_notice.parqueadero.ocupancia, 0),
+        "occupancy_percent": occupancy_percent,
+        "queue": max(0, active_notice.entrada.fila),
+        "on_the_way": active_counts.get(active_notice.entrada_id, 0),
+    }
 
 
 @login_required(login_url="login_view")
@@ -87,26 +115,7 @@ def heading(request):
         agregado_a_fila=False,
         cancelado=False,
     ).first()
-    active_trip = None
-    if active_notice:
-        remaining_seconds = max(0, int((active_notice.llegada_estimada - timezone.now()).total_seconds()))
-        remaining_minutes = (remaining_seconds + 59) // 60
-        occupancy_percent = (
-            round((active_notice.parqueadero.ocupancia / active_notice.parqueadero.capacidad) * 100)
-            if active_notice.parqueadero.capacidad
-            else 0
-        )
-        active_trip = {
-            "parqueadero": active_notice.parqueadero,
-            "parqueadero_nombre": translate_parking_name(active_notice.parqueadero.nombre, lang),
-            "entrada": active_notice.entrada,
-            "entrada_nombre": _clean_entry_name(active_notice.entrada.nombre, lang),
-            "eta_minutos": active_notice.eta_minutos,
-            "remaining_minutes": remaining_minutes,
-            "available_slots": max(active_notice.parqueadero.capacidad - active_notice.parqueadero.ocupancia, 0),
-            "occupancy_percent": occupancy_percent,
-            "queue": max(0, active_notice.entrada.fila),
-        }
+    active_trip = _active_trip_payload(active_notice, lang)
 
     context = {
         "lang": lang,
@@ -117,3 +126,46 @@ def heading(request):
         "active_trip": active_trip,
     }
     return render(request, "parqueadero/heading.html", context)
+
+
+@login_required(login_url="login_view")
+def heading_status(request):
+    lang = get_lang(request)
+    dashboard_data = get_parking_data(lang, request.user)
+    perfil, _ = PerfilUsuario.objects.get_or_create(user=request.user)
+    active_notice = AvisoEnCamino.objects.select_related(
+        "parqueadero",
+        "entrada",
+    ).filter(
+        usuario=perfil,
+        agregado_a_fila=False,
+        cancelado=False,
+    ).first()
+    active_trip = _active_trip_payload(active_notice, lang)
+
+    entries = {}
+    for parqueadero in dashboard_data["parqueaderos"]:
+        for entrada in parqueadero["entradas"]:
+            entries[str(entrada["id"])] = {
+                "queue": entrada["fila"],
+                "on_the_way": entrada["en_camino"],
+            }
+
+    active_trip_data = None
+    if active_trip:
+        active_trip_data = {
+            "entry_id": active_trip["entrada"].id,
+            "remaining_minutes": active_trip["remaining_minutes"],
+            "queue": active_trip["queue"],
+            "on_the_way": active_trip["on_the_way"],
+            "available_slots": active_trip["available_slots"],
+            "occupancy_percent": active_trip["occupancy_percent"],
+        }
+
+    return JsonResponse(
+        {
+            "entries": entries,
+            "active_trip": active_trip_data,
+            "updated_at": dashboard_data["updated_at"],
+        }
+    )

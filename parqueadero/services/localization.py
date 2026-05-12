@@ -157,6 +157,8 @@ TRANSLATIONS = {
         "availability": "Disponibilidad",
         "current_queue": "Fila actual",
         "estimated_arrival": "Llegada estimada",
+        "people_on_the_way": "Personas en camino",
+        "on_the_way_count": "en camino",
     },
     "en": {
         "welcome": "Welcome to FlowGate",
@@ -316,6 +318,8 @@ TRANSLATIONS = {
         "availability": "Availability",
         "current_queue": "Current queue",
         "estimated_arrival": "Estimated arrival",
+        "people_on_the_way": "People on the way",
+        "on_the_way_count": "on the way",
     },
 }
 

@@ -67,7 +67,7 @@
 .trip-status-grid {
     display: grid;
     gap: 14px;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .trip-status-grid div {
@@ -197,6 +197,13 @@
 .entry-option small {
     color: var(--muted);
     font-weight: 700;
+}
+
+.entry-live-metrics {
+    align-items: flex-end;
+    display: grid;
+    gap: 4px;
+    text-align: right;
 }
 
 .eta-shell {
@@ -484,6 +491,11 @@
         align-items: flex-start;
         flex-direction: column;
         min-width: 0;
+    }
+
+    .entry-live-metrics {
+        align-items: flex-start;
+        text-align: left;
     }
 
     .trip-status-grid {
