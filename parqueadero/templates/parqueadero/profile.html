@@ -76,11 +76,15 @@
                     </div>
                     <div class="form-group">
                         <label for="tipo_usuario">{{ translations.user_type }}</label>
-                        <select id="tipo_usuario" name="tipo_usuario">
-                            <option value="estudiante" {% if perfil.tipo_usuario == 'estudiante' %}selected{% endif %}>{{ translations.student }}</option>
-                            <option value="profesor" {% if perfil.tipo_usuario == 'profesor' %}selected{% endif %}>{{ translations.teacher }}</option>
-                            <option value="trabajador" {% if perfil.tipo_usuario == 'trabajador' %}selected{% endif %}>{{ translations.worker }}</option>
-                        </select>
+                        <div id="tipo_usuario" class="readonly-value">
+                            {% if perfil.tipo_usuario == 'estudiante' %}
+                                {{ translations.student }}
+                            {% elif perfil.tipo_usuario == 'profesor' %}
+                                {{ translations.teacher }}
+                            {% else %}
+                                {{ translations.worker }}
+                            {% endif %}
+                        </div>
                     </div>
                 {% endif %}
             </div>
