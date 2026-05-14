@@ -1,4 +1,4 @@
-{% load static %}
+{% load static query_params %}
 <!DOCTYPE html>
 <html lang="{{ lang|default:'es' }}">
 <head>
@@ -36,8 +36,8 @@
 
             <div class="nav-actions">
                 <div class="language-selector">
-                    <a href="{{ request.path }}?lang=es" class="{% if lang == 'es' %}active{% endif %}">ES</a>
-                    <a href="{{ request.path }}?lang=en" class="{% if lang == 'en' %}active{% endif %}">EN</a>
+                    <a href="{{ request.path }}?{% query_transform lang='es' %}" class="{% if lang == 'es' %}active{% endif %}">ES</a>
+                    <a href="{{ request.path }}?{% query_transform lang='en' %}" class="{% if lang == 'en' %}active{% endif %}">EN</a>
                 </div>
 
                 {% if user.is_authenticated %}

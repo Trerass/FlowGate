@@ -151,6 +151,14 @@ canvas {
     font-size: 2rem;
     font-weight: 800;
     gap: 12px;
+    min-width: 0;
+}
+
+.navbar-brand span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .brand-mark {
@@ -226,6 +234,7 @@ canvas {
     align-items: center;
     display: flex;
     gap: 16px;
+    min-width: 0;
 }
 
 .nav-button {
@@ -237,6 +246,7 @@ canvas {
     padding: 14px 24px;
     position: relative;
     transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    white-space: nowrap;
 }
 
 .nav-button.primary {
@@ -524,11 +534,16 @@ select:hover {
 
     .navbar-content {
         align-items: center;
+        box-sizing: border-box;
         display: grid;
         gap: 8px;
         grid-template-columns: minmax(0, 1fr) auto;
+        justify-content: stretch;
+        max-width: 100%;
         min-height: auto;
+        overflow: hidden;
         padding: 8px 12px;
+        width: 100%;
     }
 
     .navbar-menu {
@@ -588,11 +603,16 @@ select:hover {
 
     .navbar-brand {
         font-size: 1.32rem;
+        max-width: 100%;
         min-width: 0;
     }
 
     .nav-actions {
         justify-content: end;
+        justify-self: end;
+        max-width: 100%;
+        min-width: 0;
+        overflow: hidden;
         width: auto;
     }
 
@@ -619,7 +639,12 @@ select:hover {
     }
 
     .navbar-brand {
-        font-size: 1.08rem;
+        font-size: 1rem;
+        gap: 8px;
+    }
+
+    .navbar-brand span {
+        max-width: 92px;
     }
 
     .brand-mark {
@@ -638,6 +663,7 @@ select:hover {
         align-items: center;
         display: flex;
         gap: 6px;
+        min-width: 0;
     }
 
     .inline-form {
@@ -648,9 +674,11 @@ select:hover {
         align-items: center;
         font-size: 0.84rem;
         justify-content: center;
+        max-width: 112px;
         min-height: 32px;
         padding: 6px 9px;
         text-align: center;
+        text-overflow: ellipsis;
         width: auto;
     }
 
@@ -703,31 +731,38 @@ select:hover {
 
 @media (max-width: 380px) {
     .navbar-content {
-        padding: 10px 12px;
+        gap: 6px;
+        padding: 8px 10px;
     }
 
     .navbar-brand {
-        font-size: 1.12rem;
+        font-size: 0.94rem;
+        gap: 7px;
+    }
+
+    .navbar-brand span {
+        max-width: 78px;
     }
 
     .brand-mark {
-        height: 34px;
-        width: 34px;
+        height: 30px;
+        width: 30px;
     }
 
     .brand-logo {
-        height: 48px;
-        width: 48px;
+        height: 38px;
+        width: 38px;
     }
 
     .language-selector a {
-        font-size: 0.78rem;
-        padding: 7px 8px;
+        font-size: 0.72rem;
+        padding: 5px 6px;
     }
 
     .nav-button {
-        font-size: 0.9rem;
-        padding: 8px 10px;
+        font-size: 0.78rem;
+        max-width: 96px;
+        padding: 6px 8px;
     }
 
     .navbar-menu {

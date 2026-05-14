@@ -30,7 +30,9 @@ def _update_profile(user, perfil, request):
     perfil.telefono = telefono
     if not user.is_staff:
         codigo = request.POST.get("codigo_estudiantil", "").strip()
+        tipo_usuario = request.POST.get("tipo_usuario", "estudiante")
         perfil.codigo_estudiantil = codigo
+        perfil.tipo_usuario = tipo_usuario
     perfil.save()
 
 

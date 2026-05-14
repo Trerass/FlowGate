@@ -109,10 +109,29 @@ FLOWGATE_WEATHER_LONGITUDE = float(os.getenv("FLOWGATE_WEATHER_LONGITUDE", "-75.
 FLOWGATE_WEATHER_API_ENABLED = os.getenv("FLOWGATE_WEATHER_API_ENABLED", "True") == "True"
 
 
+# Payments
+PAYMENT_PROVIDER = os.getenv("PAYMENT_PROVIDER", "demo").lower()
+if PAYMENT_PROVIDER not in {"demo", "wompi"}:
+    PAYMENT_PROVIDER = "demo"
+
+WOMPI_PUBLIC_KEY = os.getenv("WOMPI_PUBLIC_KEY", "")
+WOMPI_PRIVATE_KEY = os.getenv("WOMPI_PRIVATE_KEY", "")
+WOMPI_INTEGRITY_SECRET = os.getenv("WOMPI_INTEGRITY_SECRET", "")
+WOMPI_EVENTS_SECRET = os.getenv("WOMPI_EVENTS_SECRET", "")
+WOMPI_ENV = os.getenv("WOMPI_ENV", "sandbox").lower()
+WOMPI_API_BASE_URL = (
+    "https://production.wompi.co/v1"
+    if WOMPI_ENV == "production"
+    else "https://sandbox.wompi.co/v1"
+)
+APP_BASE_URL = os.getenv("APP_BASE_URL", "")
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

@@ -105,6 +105,72 @@ class MetodoPago(models.Model):
         ordering = ['-es_activa', '-actualizado_en']
 
 
+class Wallet(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='wallet',
+    )
+    balance_cop = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Wallet de {self.user.username}: ${self.balance_cop} COP"
+
+
+class RechargeTransaction(models.Model):
+    PROVIDER_DEMO = 'demo'
+    PROVIDER_WOMPI = 'wompi'
+    PROVIDER_CHOICES = [
+        (PROVIDER_DEMO, 'Demo'),
+        (PROVIDER_WOMPI, 'Wompi'),
+    ]
+
+    STATUS_PENDING = 'PENDING'
+    STATUS_APPROVED = 'APPROVED'
+    STATUS_DECLINED = 'DECLINED'
+    STATUS_ERROR = 'ERROR'
+    STATUS_VOIDED = 'VOIDED'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pendiente'),
+        (STATUS_APPROVED, 'Aprobada'),
+        (STATUS_DECLINED, 'Rechazada'),
+        (STATUS_ERROR, 'Error'),
+        (STATUS_VOIDED, 'Anulada'),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='recharge_transactions',
+    )
+    session_key = models.CharField(max_length=64, blank=True)
+    amount_cop = models.PositiveIntegerField()
+    amount_in_cents = models.PositiveIntegerField()
+    currency = models.CharField(max_length=3, default='COP')
+    provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES, default=PROVIDER_DEMO)
+    payment_method = models.CharField(max_length=40, blank=True)
+    reference = models.CharField(max_length=80, unique=True)
+    provider_transaction_id = models.CharField(max_length=100, blank=True, db_index=True)
+    wompi_transaction_id = models.CharField(max_length=100, blank=True, db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
+    credited = models.BooleanField(default=False)
+    is_credited = models.BooleanField(default=False)
+    raw_response = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.reference} - {self.status} - ${self.amount_cop} COP"
+
+    class Meta:
+        ordering = ['-created_at']
+
+
 class Historial(models.Model):
     usuario = models.ForeignKey(PerfilUsuario, on_delete=models.CASCADE)
     parqueadero = models.ForeignKey(Parqueadero, on_delete=models.CASCADE)

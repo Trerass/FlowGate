@@ -1,16 +1,60 @@
+.sr-only {
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
 .payments-header {
     margin-bottom: 24px;
 }
 
 .payments-header h1 {
-    font-size: 3rem;
+    font-size: clamp(2.5rem, 6vw, 3.4rem);
     font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
     margin-bottom: 8px;
 }
 
 .payments-header p {
     color: var(--muted);
     font-size: 1.08rem;
+}
+
+.payments-tabs {
+    background: rgba(255, 255, 255, 0.86);
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: 28px;
+    overflow: hidden;
+}
+
+.tab-item {
+    color: #51607c;
+    display: block;
+    font-size: 1.15rem;
+    padding: 22px;
+    text-align: center;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.tab-item.active {
+    border-bottom: 3px solid var(--primary);
+    color: var(--primary);
+    font-weight: 800;
+}
+
+.tab-item:hover {
+    background: #fafcff;
+    color: var(--primary);
 }
 
 .balance-card {
@@ -21,6 +65,7 @@
     display: grid;
     gap: 22px;
     margin-bottom: 28px;
+    overflow: hidden;
     padding: 34px 38px;
     position: relative;
     transition: transform 0.26s ease, box-shadow 0.26s ease;
@@ -32,17 +77,21 @@
 }
 
 .balance-card::after {
-    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.28), transparent 45%);
+    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.26), transparent 42%);
     content: "";
     inset: 0;
     pointer-events: none;
     position: absolute;
 }
 
+.balance-card > * {
+    position: relative;
+    z-index: 1;
+}
+
 .balance-main {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     gap: 8px;
 }
 
@@ -52,35 +101,81 @@
 }
 
 .balance-main strong {
-    display: inline-flex;
     align-items: baseline;
+    display: inline-flex;
+    font-size: clamp(3rem, 8vw, 4.4rem);
+    font-weight: 900;
     gap: 8px;
-    font-size: 4rem;
-    font-weight: 800;
-    margin-top: 0;
     line-height: 1;
 }
 
-.balance-main strong .count-up {
-    font-size: inherit;
-    display: inline-block;
+.balance-main strong small {
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    opacity: 0.78;
 }
 
 .recharge-form {
     align-items: center;
     display: grid;
     gap: 14px;
-    grid-template-columns: 1fr 180px;
+    grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .recharge-form input {
     background: rgba(255, 255, 255, 0.95);
+    min-width: 0;
 }
 
 .recharge-button {
+    align-items: center;
     background: #fff;
     color: var(--primary);
+    display: inline-flex;
+    font-weight: 900;
+    justify-content: center;
     min-height: 54px;
+    min-width: 180px;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.recharge-button:hover,
+.recharge-button:focus {
+    background: #f7faff;
+    box-shadow: 0 16px 34px rgba(23, 52, 148, 0.16);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.recharge-button:active {
+    transform: translateY(0);
+}
+
+.wompi-copy {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.wompi-copy span {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.92rem;
+    font-weight: 800;
+    padding: 9px 13px;
+}
+
+.demo-mode-notice {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 18px;
+    color: rgba(255, 255, 255, 0.94);
+    font-weight: 800;
+    padding: 14px 16px;
 }
 
 .balance-note {
@@ -95,35 +190,8 @@
 }
 
 .balance-note p {
-    font-size: 1.1rem;
+    font-size: 1.08rem;
     margin-top: 10px;
-}
-
-.payments-tabs {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin-bottom: 28px;
-    overflow: hidden;
-}
-
-.tab-item {
-    color: #51607c;
-    display: block;
-    font-size: 1.2rem;
-    padding: 22px;
-    text-align: center;
-    transition: color 0.2s ease, background-color 0.2s ease;
-}
-
-.tab-item.active {
-    border-bottom: 3px solid var(--primary);
-    color: var(--primary);
-    font-weight: 700;
-}
-
-.tab-item:hover {
-    background: #fafcff;
-    color: var(--primary);
 }
 
 .payment-card-shell {
@@ -155,7 +223,7 @@ body.payment-modal-open .navbar {
 }
 
 .payment-modal-backdrop {
-    background: rgba(12, 20, 38, 0.5);
+    background: rgba(12, 20, 38, 0.52);
     border: none;
     cursor: pointer;
     inset: 0;
@@ -163,7 +231,7 @@ body.payment-modal-open .navbar {
 }
 
 .payment-modal-panel {
-    background: rgba(255, 255, 255, 0.96);
+    background: rgba(255, 255, 255, 0.97);
     border: 1px solid rgba(41, 98, 242, 0.1);
     border-radius: 30px;
     box-shadow: 0 30px 70px rgba(16, 37, 85, 0.28);
@@ -189,7 +257,7 @@ body.payment-modal-open .navbar {
     color: var(--primary);
     display: block;
     font-size: 0.82rem;
-    font-weight: 800;
+    font-weight: 900;
     text-transform: uppercase;
 }
 
@@ -204,8 +272,8 @@ body.payment-modal-open .navbar {
     border-radius: 999px;
     color: var(--primary);
     cursor: pointer;
-    font-weight: 800;
-    min-height: 40px;
+    font-weight: 900;
+    min-height: 42px;
     padding: 0 16px;
 }
 
@@ -223,26 +291,158 @@ body.payment-modal-open .navbar {
     outline: none;
 }
 
-.payment-card-modal .payment-card-form {
-    max-width: none;
+.wompi-confirm-card {
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.28), transparent 34%),
+        linear-gradient(120deg, #2962f2, #7e37ff 54%, #ea007b);
+    border-radius: 26px;
+    color: #fff;
+    display: grid;
+    gap: 22px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    margin-bottom: 18px;
+    overflow: hidden;
+    padding: 28px;
 }
 
-.payment-card-form {
+.wompi-confirm-card h3 {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    line-height: 1.02;
+    margin: 6px 0 8px;
+}
+
+.wompi-confirm-card p {
+    color: rgba(255, 255, 255, 0.84);
+    max-width: 460px;
+}
+
+.wompi-kicker {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.wompi-amount-summary {
+    align-self: center;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 22px;
     display: grid;
-    gap: 20px;
-    max-width: 820px;
+    min-width: 190px;
+    padding: 18px;
+}
+
+.wompi-amount-summary span,
+.wompi-amount-summary small,
+.wompi-summary-item span,
+.wompi-methods > span {
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.wompi-amount-summary strong {
+    font-size: clamp(2rem, 6vw, 3rem);
+    line-height: 1;
+}
+
+.wompi-summary-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 160px minmax(0, 1fr);
+    margin-bottom: 16px;
+}
+
+.wompi-summary-item {
+    background: #f6f8ff;
+    border: 1px solid rgba(41, 98, 242, 0.1);
+    border-radius: 18px;
+    display: grid;
+    gap: 6px;
     min-width: 0;
-    width: 100%;
+    padding: 16px;
+}
+
+.wompi-summary-item span,
+.wompi-methods > span {
+    color: #6a7896;
+}
+
+.wompi-summary-item strong {
+    color: #17213a;
+    overflow-wrap: anywhere;
+}
+
+.wompi-methods {
+    background: #fffaf0;
+    border: 1px solid rgba(245, 180, 0, 0.24);
+    border-radius: 18px;
+    display: grid;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 16px;
+}
+
+.wompi-methods div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.wompi-methods strong {
+    background: #fff;
+    border: 1px solid rgba(245, 180, 0, 0.22);
+    border-radius: 999px;
+    color: #835400;
+    padding: 8px 12px;
+}
+
+.payment-modal-header form,
+.demo-payment-form {
+    margin: 0;
+}
+
+.demo-method-grid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.demo-method-grid label {
+    align-items: center;
+    background: #fff;
+    border: 1px solid rgba(41, 98, 242, 0.12);
+    border-radius: 15px;
+    color: #17213a;
+    cursor: pointer;
+    display: flex;
+    font-weight: 800;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 14px;
+}
+
+.demo-method-grid input {
+    accent-color: var(--primary);
 }
 
 .payment-card-stage {
-    min-height: 420px;
+    height: 420px;
+    margin: 0 auto 18px;
+    max-width: 820px;
     perspective: 1400px;
     width: 100%;
 }
 
+.payment-card-stage[hidden] {
+    display: none;
+}
+
 .payment-card-visual {
-    height: 420px;
+    height: 100%;
     position: relative;
     transform: rotateY(0deg);
     transform-style: preserve-3d;
@@ -253,6 +453,7 @@ body.payment-modal-open .navbar {
     backface-visibility: hidden;
     border-radius: 26px;
     box-shadow: 0 26px 58px rgba(16, 37, 85, 0.22);
+    box-sizing: border-box;
     color: #fff;
     inset: 0;
     overflow: hidden;
@@ -311,8 +512,7 @@ body.payment-modal-open .navbar {
 }
 
 .payment-card-top,
-.payment-card-row,
-.payment-card-actions {
+.payment-card-row {
     align-items: center;
     display: flex;
     gap: 16px;
@@ -375,22 +575,19 @@ body.payment-modal-open .navbar {
     color: #fff;
     font-family: "Courier New", Courier, monospace;
     min-height: 48px;
+    min-width: 0;
     padding: 0 16px;
     transform: none;
-    min-width: 0;
 }
 
 .payment-card-field input::placeholder {
     color: rgba(255, 255, 255, 0.56);
 }
 
-.payment-card-visual.has-saved-card .payment-card-field input::placeholder {
-    color: rgba(255, 255, 255, 0.86);
-}
-
 .payment-card-field input:focus {
     border-color: rgba(255, 255, 255, 0.82);
     box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14);
+    outline: none;
 }
 
 .payment-card-number {
@@ -482,11 +679,16 @@ body.payment-modal-open .navbar {
     right: 30px;
 }
 
-.payment-card-actions {
+.payment-card-actions,
+.demo-payment-actions {
     display: grid;
     gap: 10px;
     justify-content: center;
     justify-items: center;
+}
+
+.demo-payment-actions {
+    width: min(100%, 420px);
 }
 
 .payment-card-submit {
@@ -498,6 +700,18 @@ body.payment-modal-open .navbar {
     color: var(--primary);
     font-weight: 800;
     text-align: center;
+}
+
+.demo-payment-actions .payment-card-cancel {
+    background: rgba(225, 29, 72, 0.08);
+    border-color: rgba(225, 29, 72, 0.18);
+    color: #be123c;
+}
+
+.demo-payment-actions .payment-card-cancel:not(.danger) {
+    background: transparent;
+    border-color: rgba(41, 98, 242, 0.18);
+    color: var(--primary);
 }
 
 .surface-panel {
@@ -600,13 +814,80 @@ body.payment-modal-open .navbar {
     margin-bottom: 10px;
 }
 
+.recharge-history-list {
+    display: grid;
+    gap: 12px;
+}
+
+.recharge-history-item {
+    align-items: center;
+    background: #f9fbff;
+    border: 1px solid #dcebff;
+    border-radius: 20px;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    padding: 18px 20px;
+}
+
+.recharge-history-item div {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.recharge-history-item span,
+.recharge-history-item small {
+    color: var(--muted);
+}
+
+.recharge-history-item strong {
+    color: #17213a;
+    font-size: 1.35rem;
+}
+
+.recharge-history-item small {
+    overflow-wrap: anywhere;
+}
+
+.payment-status {
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    padding: 9px 12px;
+}
+
+.status-approved .payment-status {
+    background: rgba(11, 187, 83, 0.12);
+    color: #087a38;
+}
+
+.status-pending .payment-status {
+    background: rgba(245, 180, 0, 0.14);
+    color: #8b5b00;
+}
+
+.status-declined .payment-status,
+.status-error .payment-status,
+.status-voided .payment-status {
+    background: rgba(225, 29, 72, 0.1);
+    color: #9f1239;
+}
+
 @media (max-width: 960px) {
-    .recharge-form {
+    .recharge-form,
+    .wompi-confirm-card,
+    .wompi-summary-grid {
         grid-template-columns: 1fr;
     }
 
-    .balance-main strong {
-        font-size: 3rem;
+    .recharge-button {
+        width: 100%;
+    }
+
+    .wompi-amount-summary {
+        min-width: 0;
     }
 
     .payment-card-stage,
@@ -619,14 +900,15 @@ body.payment-modal-open .navbar {
     }
 
     .payment-card-amount {
+        justify-items: start;
         position: relative;
         right: auto;
         top: auto;
-        justify-items: start;
     }
 
     .payment-card-number {
         margin-top: 10px;
+        max-width: none;
     }
 
     .payment-card-row,
@@ -683,38 +965,14 @@ body.payment-modal-open .navbar {
         padding: 20px;
     }
 
-    .balance-card {
-        gap: 16px;
-        margin-bottom: 16px;
-    }
-
-    .balance-main strong {
-        font-size: 2.7rem;
-    }
-
-    .balance-note {
-        border-radius: 16px;
-        padding: 16px;
-    }
-
-    .recharge-form {
-        align-items: stretch;
-        grid-template-columns: 1fr;
-    }
-
     .payments-tabs {
         border-radius: 18px;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
         margin-bottom: 18px;
     }
 
     .tab-item {
         font-size: 0.9rem;
         padding: 14px 8px;
-    }
-
-    .payment-card-form {
-        gap: 16px;
     }
 
     .payment-card-modal {
@@ -742,14 +1000,13 @@ body.payment-modal-open .navbar {
         font-size: 1.2rem;
     }
 
-    .payment-modal-close {
-        min-height: 36px;
-        padding: 0 12px;
+    .wompi-confirm-card {
+        border-radius: 22px;
+        padding: 20px;
     }
 
-    .payment-card-cancel {
-        min-height: 46px;
-        width: 100%;
+    .demo-method-grid {
+        grid-template-columns: 1fr;
     }
 
     .payment-card-stage,
@@ -823,12 +1080,18 @@ body.payment-modal-open .navbar {
         width: calc(100% - 40px);
     }
 
+    .payment-card-cancel {
+        min-height: 46px;
+        width: 100%;
+    }
+
     .rate-card {
         border-radius: 18px;
         padding: 20px;
     }
 
-    .rate-header {
+    .rate-header,
+    .recharge-history-item {
         align-items: flex-start;
         flex-direction: column;
         gap: 10px;
@@ -848,6 +1111,11 @@ body.payment-modal-open .navbar {
     .surface-panel,
     .info-banner {
         padding: 18px;
+    }
+
+    .wompi-copy span {
+        font-size: 0.82rem;
+        padding: 8px 10px;
     }
 
     .payment-card-stage,

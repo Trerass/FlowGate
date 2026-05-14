@@ -11,6 +11,10 @@ urlpatterns = [
     path("profile/", views.profile, name="profile"),
     path("history/", views.history, name="history"),
     path("payments/", views.payments, name="payments"),
+    path("payments/recharge/", views.create_recharge, name="create_recharge"),
+    path("payments/demo/", views.demo_payment, name="demo_payment"),
+    path("payments/wompi/return/", views.wompi_return, name="wompi_return"),
+    path("payments/wompi/webhook/", views.wompi_webhook, name="wompi_webhook"),
     path("panel-admin/", views.admin_panel, name="admin_panel"),
 ]
 

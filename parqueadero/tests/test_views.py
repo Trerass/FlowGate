@@ -3,14 +3,16 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
+from unittest.mock import patch
 
 from parqueadero.models import (
     AvisoEnCamino,
     Entrada,
-    MetodoPago,
     Parqueadero,
     PerfilUsuario,
+    RechargeTransaction,
     Vehiculo,
+    Wallet,
 )
 
 
@@ -36,18 +38,12 @@ class PublicViewsTests(TestCase):
 
     def test_payments_post_publico_redirige_a_login(self):
         response = self.client.post(
-            reverse("payments"),
-            {
-                "action": "save_card",
-                "card_number": "4111 1111 1111 1111",
-                "expiry": "12/30",
-                "cvv": "123",
-                "card_name": "Visitante",
-            },
+            reverse("create_recharge"),
+            {"amount": "20000"},
         )
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("login_view"), response["Location"])
-        self.assertFalse(MetodoPago.objects.exists())
+        self.assertFalse(RechargeTransaction.objects.exists())
 
     def test_heading_requiere_autenticacion(self):
         response = self.client.get(reverse("heading"), {"eta": 20})
@@ -311,31 +307,37 @@ class AuthenticatedViewsTests(TestCase):
         self.assertEqual(data["active_trip"]["entry_id"], entrada.id)
         self.assertEqual(data["active_trip"]["on_the_way"], 2)
 
-    def test_payments_autenticado_muestra_funciones_de_pago(self):
-        self.client.login(username="maria", password="123456")
-        response = self.client.get(reverse("payments"), {"amount": 5000})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Monto a recargar")
-        self.assertContains(response, "data-payment-modal")
-        self.assertContains(response, 'data-cancel-url="/payments/?lang=es&tab=recharge"')
-        self.assertContains(response, "payment-modal-panel")
-        self.assertContains(response, "Cancelar recarga")
-        self.assertContains(response, "payment-card-visual")
-        self.assertContains(response, "payment-card-front")
-        self.assertContains(response, "payment-card-back")
-        self.assertContains(response, "data-card-back-trigger")
-        self.assertContains(response, "data-card-expiry")
-        self.assertContains(response, "0000 0000 0000 0000")
-        self.assertContains(response, "5000")
-        self.assertNotContains(response, "Personal - Automovil")
-
-    def test_payments_autenticado_oculta_tarjeta_hasta_recargar(self):
+    def test_payments_autenticado_muestra_funciones_de_recarga(self):
         self.client.login(username="maria", password="123456")
         response = self.client.get(reverse("payments"), {"tab": "recharge"})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Monto a recargar")
-        self.assertNotContains(response, "payment-card-visual")
-        self.assertNotContains(response, "0000 0000 0000 0000")
+        self.assertContains(response, "Recarga segura")
+        self.assertNotContains(response, "Modo demo académico")
+        self.assertNotContains(response, "Esta transacción no mueve dinero real.")
+        self.assertContains(response, reverse("create_recharge"))
+        self.assertContains(response, 'data-cop-input')
+        self.assertContains(response, 'data-count="0"')
+        self.assertNotContains(response, "Personal - Automovil")
+        self.assertNotContains(response, "Numero de tarjeta")
+
+    def test_payments_autenticado_oculta_modal_hasta_crear_recarga(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(reverse("payments"), {"tab": "recharge"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Monto a recargar")
+        self.assertNotContains(response, "wompi-confirm-modal")
+        self.assertFalse(RechargeTransaction.objects.exists())
+
+    def test_selector_idioma_preserva_query_actual(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.get(
+            reverse("payments"),
+            {"tab": "recharge", "amount": "5000", "lang": "es"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "/payments/?tab=recharge&amp;amount=5000&amp;lang=en")
+        self.assertContains(response, "/payments/?tab=recharge&amp;amount=5000&amp;lang=es")
 
     def test_payments_autenticado_tarifas_no_muestra_recarga(self):
         self.client.login(username="maria", password="123456")
@@ -346,7 +348,7 @@ class AuthenticatedViewsTests(TestCase):
         self.assertContains(response, "Recargar")
         self.assertContains(response, "Historial")
         self.assertNotContains(response, "Monto a recargar")
-        self.assertNotContains(response, "payment-card-visual")
+        self.assertNotContains(response, "wompi-confirm-modal")
 
     def test_payments_autenticado_historial_muestra_estado_vacio(self):
         self.client.login(username="maria", password="123456")
@@ -354,50 +356,191 @@ class AuthenticatedViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Historial")
         self.assertContains(response, "Sin registros aun")
+        self.assertContains(response, "No tienes recargas registradas todavia.")
         self.assertNotContains(response, "Monto a recargar")
         self.assertNotContains(response, "Tarifas de parqueadero")
 
-    def test_payments_guarda_metodo_de_pago_seguro(self):
+    @override_settings(
+        WOMPI_PUBLIC_KEY="pub_test",
+        WOMPI_PRIVATE_KEY="prv_test",
+        WOMPI_INTEGRITY_SECRET="integrity_test",
+        PAYMENT_PROVIDER="wompi",
+        APP_BASE_URL="http://testserver",
+    )
+    def test_create_recharge_crea_transaccion_pendiente_con_wompi_real(self):
         self.client.login(username="maria", password="123456")
         response = self.client.post(
-            reverse("payments"),
-            {
-                "action": "save_card",
-                "card_number": "4111 1111 1111 1111",
-                "expiry": "12/30",
-                "cvv": "123",
-                "card_name": "Maria Gomez",
-            },
+            reverse("create_recharge"),
+            {"amount": "$ 20.000 COP"},
         )
         self.assertEqual(response.status_code, 302)
-        metodo = MetodoPago.objects.get(usuario__user=self.user)
-        self.assertEqual(metodo.marca, "Visa")
-        self.assertEqual(metodo.ultimos_cuatro, "1111")
-        self.assertEqual(metodo.titular, "MARIA GOMEZ")
-        field_names = [field.name for field in MetodoPago._meta.get_fields()]
-        self.assertNotIn("cvv", field_names)
-        self.assertNotIn("card_number", field_names)
+        recharge = RechargeTransaction.objects.get(user=self.user)
+        self.assertEqual(recharge.amount_cop, 20000)
+        self.assertEqual(recharge.amount_in_cents, 2000000)
+        self.assertEqual(recharge.provider, RechargeTransaction.PROVIDER_WOMPI)
+        self.assertEqual(recharge.status, RechargeTransaction.STATUS_PENDING)
+        self.assertFalse(recharge.credited)
+        self.assertIn("reference=", response["Location"])
+        self.assertEqual(Wallet.objects.get(user=self.user).balance_cop, 0)
 
-        response = self.client.get(reverse("payments"), {"amount": 5000})
-        self.assertContains(response, "payment-card-visual has-saved-card")
-        self.assertContains(response, "**** **** **** 1111")
-        self.assertContains(response, "12/30")
-        self.assertContains(response, "MARIA GOMEZ")
+        response = self.client.get(response["Location"])
+        self.assertContains(response, "data-payment-modal")
+        self.assertContains(response, "Continuar al pago")
+        self.assertContains(response, "checkout.wompi.co")
+        self.assertContains(response, recharge.reference)
+        self.assertContains(response, "Procesado por Wompi")
 
-    def test_payments_rechaza_tarjeta_invalida(self):
+    def test_create_recharge_rechaza_monto_invalido(self):
         self.client.login(username="maria", password="123456")
         response = self.client.post(
-            reverse("payments"),
-            {
-                "action": "save_card",
-                "card_number": "123",
-                "expiry": "01/20",
-                "cvv": "12",
-                "card_name": "Maria Gomez",
-            },
+            reverse("create_recharge"),
+            {"amount": "0"},
         )
         self.assertEqual(response.status_code, 302)
-        self.assertFalse(MetodoPago.objects.exists())
+        self.assertFalse(RechargeTransaction.objects.exists())
+
+    @override_settings(PAYMENT_PROVIDER="wompi", WOMPI_PUBLIC_KEY="", WOMPI_INTEGRITY_SECRET="")
+    def test_create_recharge_sin_configuracion_no_crea_transaccion(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.post(
+            reverse("create_recharge"),
+            {"amount": "20000"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(RechargeTransaction.objects.exists())
+
+    @override_settings(PAYMENT_PROVIDER="demo", WOMPI_PUBLIC_KEY="", WOMPI_INTEGRITY_SECRET="")
+    def test_demo_checkout_permite_probar_recarga_local(self):
+        self.client.login(username="maria", password="123456")
+        response = self.client.post(reverse("create_recharge"), {"amount": "20000"})
+        self.assertEqual(response.status_code, 302)
+        recharge = RechargeTransaction.objects.get(user=self.user)
+
+        response = self.client.get(response["Location"])
+        self.assertContains(response, "Pago seguro")
+        self.assertContains(response, "Revisa el monto antes de continuar con el pago seguro.")
+        self.assertNotContains(response, "Modo demo académico")
+        self.assertNotContains(response, "Esta transacción no mueve dinero real.")
+        self.assertContains(response, "payment-card-visual")
+        self.assertContains(response, "Numero de tarjeta")
+        self.assertContains(response, "0000 0000 0000 0000")
+        self.assertContains(response, "data-demo-card-panel")
+        self.assertContains(response, "data-card-cvv")
+        self.assertContains(response, "Realizar pago")
+        self.assertNotContains(response, "Billetera digital")
+        self.assertNotContains(response, "Guardar tarjeta y efectuar pago")
+
+        response = self.client.post(
+            reverse("demo_payment"),
+            {"reference": recharge.reference, "result": "approved", "payment_method": "nequi"},
+        )
+        self.assertEqual(response.status_code, 302)
+        recharge.refresh_from_db()
+        self.assertEqual(recharge.status, RechargeTransaction.STATUS_APPROVED)
+        self.assertEqual(recharge.payment_method, "Nequi")
+        self.assertEqual(Wallet.objects.get(user=self.user).balance_cop, 20000)
+
+    @override_settings(PAYMENT_PROVIDER="demo", WOMPI_PUBLIC_KEY="", WOMPI_INTEGRITY_SECRET="")
+    def test_demo_checkout_rechazado_no_actualiza_saldo(self):
+        self.client.login(username="maria", password="123456")
+        Wallet.objects.create(user=self.user, balance_cop=5000)
+        response = self.client.post(reverse("create_recharge"), {"amount": "20000"})
+        recharge = RechargeTransaction.objects.get(user=self.user)
+
+        response = self.client.post(
+            reverse("demo_payment"),
+            {"reference": recharge.reference, "result": "declined", "payment_method": "pse"},
+        )
+        self.assertEqual(response.status_code, 302)
+        recharge.refresh_from_db()
+        self.assertEqual(recharge.status, RechargeTransaction.STATUS_DECLINED)
+        self.assertEqual(recharge.payment_method, "PSE")
+        self.assertEqual(Wallet.objects.get(user=self.user).balance_cop, 5000)
+
+    @override_settings(PAYMENT_PROVIDER="demo", WOMPI_PUBLIC_KEY="", WOMPI_INTEGRITY_SECRET="")
+    def test_demo_checkout_cancelado_no_actualiza_saldo(self):
+        self.client.login(username="maria", password="123456")
+        Wallet.objects.create(user=self.user, balance_cop=5000)
+        response = self.client.post(reverse("create_recharge"), {"amount": "20000"})
+        recharge = RechargeTransaction.objects.get(user=self.user)
+
+        response = self.client.post(
+            reverse("demo_payment"),
+            {"reference": recharge.reference, "result": "voided", "payment_method": "nequi"},
+        )
+        self.assertEqual(response.status_code, 302)
+        recharge.refresh_from_db()
+        self.assertEqual(recharge.status, RechargeTransaction.STATUS_VOIDED)
+        self.assertEqual(Wallet.objects.get(user=self.user).balance_cop, 5000)
+
+    @override_settings(PAYMENT_PROVIDER="wompi", WOMPI_PUBLIC_KEY="", WOMPI_INTEGRITY_SECRET="")
+    def test_demo_checkout_no_funciona_si_el_proveedor_es_wompi(self):
+        self.client.login(username="maria", password="123456")
+        recharge = RechargeTransaction.objects.create(
+            user=self.user,
+            amount_cop=20000,
+            amount_in_cents=2000000,
+            provider=RechargeTransaction.PROVIDER_DEMO,
+            reference="FG-DEMO-DISABLED",
+        )
+        response = self.client.post(
+            reverse("demo_payment"),
+            {"reference": recharge.reference, "result": "approved"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    @override_settings(WOMPI_PRIVATE_KEY="prv_test")
+    def test_wompi_return_aprobado_actualiza_saldo(self):
+        self.client.login(username="maria", password="123456")
+        Wallet.objects.create(user=self.user, balance_cop=5000)
+        recharge = RechargeTransaction.objects.create(
+            user=self.user,
+            amount_cop=20000,
+            amount_in_cents=2000000,
+            reference="FG-RETURN",
+        )
+        wompi_data = {
+            "id": "wompi-return",
+            "reference": recharge.reference,
+            "status": "APPROVED",
+            "amount_in_cents": recharge.amount_in_cents,
+            "currency": recharge.currency,
+        }
+
+        with patch("parqueadero.views.payments.get_wompi_transaction", return_value=wompi_data):
+            response = self.client.get(reverse("wompi_return"), {"id": "wompi-return"})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("tab=history", response["Location"])
+        recharge.refresh_from_db()
+        self.assertEqual(recharge.status, RechargeTransaction.STATUS_APPROVED)
+        self.assertEqual(Wallet.objects.get(user=self.user).balance_cop, 25000)
+
+    @override_settings(WOMPI_PRIVATE_KEY="prv_test")
+    def test_wompi_return_rechazado_no_actualiza_saldo(self):
+        self.client.login(username="maria", password="123456")
+        Wallet.objects.create(user=self.user, balance_cop=5000)
+        recharge = RechargeTransaction.objects.create(
+            user=self.user,
+            amount_cop=20000,
+            amount_in_cents=2000000,
+            reference="FG-DECLINED-RETURN",
+        )
+        wompi_data = {
+            "id": "wompi-return",
+            "reference": recharge.reference,
+            "status": "DECLINED",
+            "amount_in_cents": recharge.amount_in_cents,
+            "currency": recharge.currency,
+        }
+
+        with patch("parqueadero.views.payments.get_wompi_transaction", return_value=wompi_data):
+            response = self.client.get(reverse("wompi_return"), {"id": "wompi-return"})
+
+        self.assertEqual(response.status_code, 302)
+        recharge.refresh_from_db()
+        self.assertEqual(recharge.status, RechargeTransaction.STATUS_DECLINED)
+        self.assertEqual(Wallet.objects.get(user=self.user).balance_cop, 5000)
 
     def test_profile_actualiza_datos_personales(self):
         self.client.login(username="maria", password="123456")
